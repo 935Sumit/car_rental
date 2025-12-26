@@ -1,0 +1,463 @@
+.home {
+  padding-top: 80px;
+}
+
+/* Hero Section */
+.hero {
+  background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 50%, #2c2c2c 100%);
+  color: var(--bg-white);
+  padding: 120px 0 80px;
+  position: relative;
+  overflow: hidden;
+  min-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(circle at 20% 50%, rgba(212, 175, 55, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(212, 175, 55, 0.1) 0%, transparent 50%),
+    url('data:image/svg+xml,<svg width="60" height="60" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse"><path d="M 60 0 L 0 0 0 60" fill="none" stroke="rgba(212,175,55,0.03)" stroke-width="1"/></pattern></defs><rect width="100%" height="100%" fill="url(%23grid)"/></svg>');
+  animation: heroGradient 15s ease infinite;
+}
+
+@keyframes heroGradient {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 0.8; }
+}
+
+.hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=1920&q=80') center/cover no-repeat;
+  opacity: 0.08;
+  z-index: 0;
+}
+
+.hero-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  position: relative;
+  z-index: 1;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(212, 175, 55, 0.1);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  padding: 10px 20px;
+  border-radius: 50px;
+  margin-bottom: 24px;
+  font-size: 14px;
+  color: var(--primary-color);
+  font-weight: 500;
+}
+
+.hero-text h1 {
+  font-size: 72px;
+  margin-bottom: 24px;
+  background: linear-gradient(135deg, #ffffff 0%, var(--primary-color) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1.1;
+  font-weight: 700;
+  letter-spacing: -2px;
+}
+
+.hero-text p {
+  font-size: 20px;
+  margin-bottom: 40px;
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1.7;
+  max-width: 600px;
+}
+
+.hero-buttons {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.hero-stats {
+  display: flex;
+  gap: 40px;
+  margin-top: 50px;
+  flex-wrap: wrap;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.stat-item strong {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--primary-color);
+  font-family: 'Playfair Display', serif;
+}
+
+.stat-item span {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 500;
+}
+
+.hero-search {
+  max-width: 1200px;
+  margin: 60px auto 0;
+  padding: 0 20px;
+  position: relative;
+  z-index: 2;
+}
+
+/* Stats Section */
+.stats-section {
+  background: var(--bg-white);
+  padding: 60px 0;
+  box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.05);
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 30px;
+}
+
+.stat-card {
+  text-align: center;
+  padding: 30px;
+  background: var(--bg-light);
+  border-radius: 10px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.stat-card:hover {
+  background: var(--primary-color);
+  color: var(--secondary-color);
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-lg);
+}
+
+.stat-number {
+  font-size: 48px;
+  font-weight: 700;
+  color: var(--primary-color);
+  margin-bottom: 10px;
+  font-family: 'Playfair Display', serif;
+}
+
+.stat-card:hover .stat-number {
+  color: var(--secondary-color);
+}
+
+.stat-label {
+  font-size: 16px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Featured Section */
+.featured-section {
+  background: var(--bg-white);
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+.section-header h2 {
+  font-size: 42px;
+  margin-bottom: 15px;
+  color: var(--secondary-color);
+}
+
+.section-header p {
+  font-size: 18px;
+  color: var(--text-secondary);
+}
+
+.cars-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 30px;
+  margin-bottom: 50px;
+}
+
+.car-card {
+  background: var(--bg-white);
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  transition: all 0.3s ease;
+  display: block;
+}
+
+.car-card:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-10px);
+}
+
+.car-image {
+  position: relative;
+  width: 100%;
+  height: 250px;
+  overflow: hidden;
+  background: var(--bg-light);
+}
+
+.car-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.car-card:hover .car-image img {
+  transform: scale(1.1);
+}
+
+.car-badge {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: var(--primary-color);
+  color: var(--secondary-color);
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.car-info {
+  padding: 20px;
+}
+
+.car-info h3 {
+  font-size: 22px;
+  margin-bottom: 10px;
+  color: var(--secondary-color);
+}
+
+.car-details {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  color: var(--text-secondary);
+  font-size: 14px;
+  margin-bottom: 15px;
+}
+
+.car-price {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--primary-color);
+  font-family: 'Playfair Display', serif;
+}
+
+.section-footer {
+  text-align: center;
+}
+
+/* Rental Section */
+.rental-section {
+  background: var(--bg-light);
+}
+
+.rentals-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 30px;
+  margin-bottom: 50px;
+}
+
+.rental-card {
+  background: var(--bg-white);
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  transition: all 0.3s ease;
+  display: block;
+}
+
+.rental-card:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-10px);
+}
+
+.rental-image {
+  position: relative;
+  width: 100%;
+  height: 250px;
+  overflow: hidden;
+  background: var(--bg-light);
+}
+
+.rental-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.rental-card:hover .rental-image img {
+  transform: scale(1.1);
+}
+
+.rental-badge {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: var(--success);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.rental-info {
+  padding: 20px;
+}
+
+.rental-info h3 {
+  font-size: 22px;
+  margin-bottom: 10px;
+  color: var(--secondary-color);
+}
+
+.rental-details {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  color: var(--text-secondary);
+  font-size: 14px;
+  margin-bottom: 15px;
+}
+
+.rental-rates {
+  display: flex;
+  gap: 15px;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--primary-color);
+}
+
+/* CTA Section */
+.cta-section {
+  background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+  color: var(--secondary-color);
+  padding: 80px 0;
+}
+
+.cta-content {
+  text-align: center;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.cta-content h2 {
+  font-size: 42px;
+  margin-bottom: 20px;
+}
+
+.cta-content p {
+  font-size: 20px;
+  margin-bottom: 30px;
+  opacity: 0.9;
+}
+
+@media (max-width: 968px) {
+  .hero {
+    min-height: auto;
+    padding: 100px 0 60px;
+  }
+
+  .hero-text h1 {
+    font-size: 48px;
+  }
+
+  .hero-text p {
+    font-size: 18px;
+  }
+
+  .hero-stats {
+    gap: 30px;
+    justify-content: center;
+  }
+
+  .hero-buttons {
+    justify-content: center;
+  }
+
+  .cars-grid,
+  .rentals-grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-text h1 {
+    font-size: 36px;
+    letter-spacing: -1px;
+  }
+
+  .hero-text p {
+    font-size: 16px;
+  }
+
+  .stat-item strong {
+    font-size: 24px;
+  }
+
+  .stat-item span {
+    font-size: 12px;
+  }
+
+  .hero-buttons {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .hero-buttons .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .hero-badge {
+    font-size: 12px;
+    padding: 8px 16px;
+  }
+
+  .section-header h2 {
+    font-size: 32px;
+  }
+
+  .cars-grid,
+  .rentals-grid {
+    grid-template-columns: 1fr;
+  }
+}
+

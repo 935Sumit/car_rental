@@ -1,0 +1,168 @@
+.sell-cars {
+  padding-top: 80px;
+  min-height: 100vh;
+  background: var(--bg-light);
+}
+
+.submission-success {
+  min-height: calc(100vh - 80px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-light);
+}
+
+.success-content {
+  text-align: center;
+  background: var(--bg-white);
+  padding: 60px 40px;
+  border-radius: 20px;
+  box-shadow: var(--shadow-lg);
+  max-width: 500px;
+}
+
+.success-icon {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: var(--success);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 50px;
+  margin: 0 auto 30px;
+}
+
+.success-content h2 {
+  font-size: 32px;
+  margin-bottom: 15px;
+  color: var(--secondary-color);
+}
+
+.success-content p {
+  font-size: 18px;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+}
+
+.sell-form-container {
+  padding: 40px 0;
+}
+
+.sell-form {
+  background: var(--bg-white);
+  border-radius: 15px;
+  padding: 40px;
+  box-shadow: var(--shadow);
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.form-section {
+  margin-bottom: 40px;
+  padding-bottom: 30px;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.form-section:last-of-type {
+  border-bottom: none;
+}
+
+.form-section h3 {
+  font-size: 24px;
+  margin-bottom: 25px;
+  color: var(--secondary-color);
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 14px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  padding: 12px;
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 14px;
+  transition: border-color 0.3s ease;
+  font-family: inherit;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.form-help {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 15px;
+}
+
+.image-inputs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.form-actions {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin-top: 40px;
+  padding-top: 30px;
+  border-top: 2px solid var(--border-color);
+}
+
+.form-actions .btn {
+  min-width: 150px;
+}
+
+@media (max-width: 768px) {
+  .sell-form {
+    padding: 25px;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .image-inputs {
+    grid-template-columns: 1fr;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .form-actions .btn {
+    width: 100%;
+  }
+}
+

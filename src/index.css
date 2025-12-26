@@ -1,0 +1,145 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --primary-color: #d4af37;
+  --primary-dark: #b8941f;
+  --secondary-color: #1a1a1a;
+  --accent-color: #8b4513;
+  --text-primary: #2c2c2c;
+  --text-secondary: #666;
+  --bg-light: #f8f8f8;
+  --bg-white: #ffffff;
+  --border-color: #e0e0e0;
+  --success: #28a745;
+  --error: #dc3545;
+  --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  color: var(--text-primary);
+  background-color: var(--bg-light);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Playfair Display', serif;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+}
+
+input, textarea, select {
+  font-family: inherit;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.section {
+  padding: 80px 0;
+}
+
+.btn {
+  padding: 12px 30px;
+  border-radius: 5px;
+  font-weight: 600;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  display: inline-block;
+  text-align: center;
+}
+
+.btn-primary {
+  background: var(--primary-color);
+  color: var(--secondary-color);
+}
+
+.btn-primary:hover {
+  background: var(--primary-dark);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.btn-secondary {
+  background: var(--secondary-color);
+  color: var(--bg-white);
+}
+
+.btn-secondary:hover {
+  background: #2c2c2c;
+  transform: translateY(-2px);
+}
+
+.btn-outline {
+  background: transparent;
+  border: 2px solid var(--primary-color);
+  color: var(--primary-color);
+}
+
+.btn-outline:hover {
+  background: var(--primary-color);
+  color: var(--secondary-color);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.6s ease-out;
+}
+
+.slide-in {
+  animation: slideIn 0.6s ease-out;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .section {
+    padding: 50px 0;
+  }
+  
+  .container {
+    padding: 0 15px;
+  }
+}
+
