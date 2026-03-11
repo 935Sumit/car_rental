@@ -38,3 +38,11 @@ backend/models/*.pkl
 
 # Data files (optional - uncomment if you don't want to commit CSV)
 # backend/data/*.csv
+
+# Environment Variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
