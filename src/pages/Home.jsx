@@ -1,176 +1,227 @@
-import { Link } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { useState, useMemo } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { useNavigate } from 'react-router-dom'
 import { useCarContext } from '../context/CarContext'
 import SearchBar from '../components/SearchBar'
+import BookingModal from '../components/BookingModal'
+import ComparisonBar from '../components/ComparisonBar'
+import CompareModal from '../components/CompareModal'
+import { HiLocationMarker, HiBookmark, HiRefresh } from 'react-icons/hi'
+import { MdWavingHand, MdCompareArrows } from 'react-icons/md'
 import './Home.css'
 
 const Home = () => {
-  const { cars, rentals } = useCarContext()
-  const featuredCars = cars.slice(0, 6)
-  const featuredRentals = rentals.slice(0, 3)
+  const navigate = useNavigate()
+  const { filteredRentals, searchQuery, setSearchQuery, typeFilter, setTypeFilter, rentals, toggleSaveCar, isCarSaved, compareList, toggleCompare } = useCarContext()
+  const [selectedRental, setSelectedRental] = useState(null)
+  const [showBookingModal, setShowBookingModal] = useState(false)
+  const [showCompareModal, setShowCompareModal] = useState(false)
+  const [error, setError] = useState('')
+
+  const carTypes = ['All', 'Hatchback', 'Sedan', 'SUV', 'Luxury']
+
+  const handleViewDetails = (carId) => {
+    navigate(`/car/${carId}`)
+  }
+
+  const staggerContainer = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.1 }
+    }
+  }
+
+  const cardVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
+  }
 
   return (
     <div className="home">
       {/* Hero Section */}
       <section className="hero">
-        <div className="hero-overlay"></div>
         <div className="hero-content">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
+          {localStorage.getItem('currentUser') && (() => {
+            const user = JSON.parse(localStorage.getItem('currentUser'));
+            const firstName = user.fullName ? user.fullName.split(' ')[0] : 'User';
+            return (
+              <motion.p
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="user-greeting"
+                style={{ marginBottom: '10px', fontWeight: '700', color: '#fff', textShadow: '0 2px 4px rgba(0,0,0,0.3)', display: 'flex', alignItems: 'center', gap: '8px' }}
+              >
+                Hello, {firstName} <MdWavingHand />
+              </motion.p>
+            );
+          })()}
+          <motion.h1
+            initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="hero-text"
+            transition={{ duration: 0.6 }}
           >
-            <div className="hero-badge">
-              <span>Trusted by 10,000+ customers</span>
-            </div>
-            <h1>Find Your Perfect Ride</h1>
-            <p>Discover premium used cars from trusted sellers across India. Quality assured, transparent pricing, and hassle-free ownership transfer.</p>
-            <div className="hero-buttons">
-              <Link to="/buy" className="btn btn-primary">Browse Collection</Link>
-              <Link to="/sell" className="btn btn-outline">Sell Your Car</Link>
-            </div>
-            <div className="hero-stats">
-              <div className="stat-item">
-                <strong>500+</strong>
-                <span>Quality Cars</span>
-              </div>
-              <div className="stat-item">
-                <strong>50+</strong>
-                <span>Brands Available</span>
-              </div>
-              <div className="stat-item">
-                <strong>24/7</strong>
-                <span>Customer Support</span>
-              </div>
-            </div>
-          </motion.div>
-        </div>
-        <div className="hero-search">
-          <SearchBar />
+            Find Your <span className="gradient-text">Perfect Ride</span> in Anand
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3, duration: 0.6 }}
+          >
+            Explore our curated collection of premium rental cars. From city hatchbacks to luxury sedans, we have it all.
+          </motion.p>
+
+          <div className="hero-search-container">
+            <SearchBar value={searchQuery} onChange={setSearchQuery} placeholder="Search by name, brand, city, or type..." />
+          </div>
+
+          {error && (
+            <motion.div
+              className="global-error-banner"
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              {error}
+            </motion.div>
+          )}
         </div>
       </section>
 
+      {/* Filter Chips */}
+      <section className="filters-section">
+        <div className="container">
+          <div className="filter-chips">
+            {carTypes.map(type => (
+              <button
+                key={type}
+                className={`filter-chip ${typeFilter === type ? 'active' : ''}`}
+                onClick={() => setTypeFilter(type)}
+              >
+                {type}
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
 
-
-      {/* Featured Cars Section */}
-      <section className="section featured-section">
+      {/* Car Grid */}
+      <section className="car-listing" id="rentals">
         <div className="container">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="section-header"
+            className="rental-cards-grid"
+            variants={staggerContainer}
+            initial="hidden"
+            animate="visible"
           >
-            <h2>Featured Models</h2>
-            <p>Handpicked cars that offer great value and quality</p>
-          </motion.div>
-          <div className="cars-grid">
-            {featuredCars.map((car, index) => (
+            {filteredRentals.map(car => (
               <motion.div
                 key={car.id}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                whileHover={{ y: -10 }}
+                variants={cardVariants}
+                className="rental-card-home"
+                onClick={() => handleViewDetails(car.id)}
+                style={{ cursor: 'pointer' }}
               >
-                <Link to={`/car/${car.id}`} className="car-card">
-                  <div className="car-image">
-                    <img src={car.images[0]} alt={car.name} />
-                    <div className="car-badge">{car.condition}</div>
+                <div className="rc-image-wrapper">
+                  <img src={car.image} alt={car.name} className="rc-image" />
+                  <div className={`rc-availability ${car.availability ? 'available' : 'unavailable'}`}>
+                    {car.availability ? 'Available' : 'Booked'}
                   </div>
-                  <div className="car-info">
-                    <h3>{car.name}</h3>
-                    <div className="car-details">
-                      <span>{car.year}</span>
-                      <span>•</span>
-                      <span>{car.mileage.toLocaleString()} miles</span>
-                      <span>•</span>
-                      <span>{car.transmission}</span>
+                  <div className="rc-type-badge">{car.type}</div>
+                </div>
+
+                <div className="rc-body">
+                  <div className="rc-header">
+                    <h3 className="rc-name">{car.name}</h3>
+                    <div className="rc-specs">
+                      {car.fuel && <span>{car.fuel}</span>}
+                      {car.fuel && (car.transmission || car.seats) && <span className="separator">•</span>}
+                      {car.transmission && <span>{car.transmission}</span>}
+                      {car.transmission && car.seats && <span className="separator">•</span>}
+                      {car.seats && <span>{car.seats} Seater</span>}
                     </div>
-                    <div className="car-price">₹{car.price.toLocaleString('en-IN')}</div>
+                    <span className="rc-brand">{car.brand}</span>
                   </div>
-                </Link>
+
+                  <div className="rc-info">
+                    <div className="rc-location">
+                      <HiLocationMarker />
+                      {car.city}
+                    </div>
+                  </div>
+
+                  <div className="rc-price-section">
+                    <span className="rc-price">₹{car.pricePerDay}</span>
+                    <span className="rc-label">/ day</span>
+                  </div>
+
+                  <div className="rc-actions">
+                    {JSON.parse(localStorage.getItem('currentUser')) && (
+                      <button
+                        className={`btn-save-bookmark ${isCarSaved(car.id) ? 'saved' : ''}`}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          toggleSaveCar(car)
+                        }}
+                        title={isCarSaved(car.id) ? 'Remove from Saved' : 'Save for Later'}
+                      >
+                        <HiBookmark />
+                      </button>
+                    )}
+                    <button
+                      className={`btn-compare-card ${compareList.some(c => c.id === car.id) ? 'active' : ''}`}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        toggleCompare(car)
+                      }}
+                      title="Compare this car"
+                    >
+                      <MdCompareArrows />
+                    </button>
+                    <button
+                      className="btn-book"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleViewDetails(car.id)
+                      }}
+                    >
+                      View Details
+                    </button>
+                  </div>
+                </div>
               </motion.div>
             ))}
-          </div>
-          <div className="section-footer">
-            <Link to="/buy" className="btn btn-primary">View All Cars</Link>
-          </div>
+          </motion.div>
+
+          {filteredRentals.length === 0 && (
+            <div className="no-results">
+              <h3>No cars found matching your search.</h3>
+              <p>Try searching for a different brand or type.</p>
+            </div>
+          )}
         </div>
       </section>
 
-      {/* Rental Section */}
-      <section className="section rental-section">
-        <div className="container">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="section-header"
-          >
-            <h2>Rent for Special Occasions</h2>
-            <p>Make your event unforgettable with our classic car rentals</p>
-          </motion.div>
-          <div className="rentals-grid">
-            {featuredRentals.map((rental, index) => (
-              <motion.div
-                key={rental.id}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                whileHover={{ y: -10 }}
-              >
-                <Link to={`/rent`} className="rental-card">
-                  <div className="rental-image">
-                    <img src={rental.images[0]} alt={rental.name} />
-                    <div className="rental-badge">Available</div>
-                  </div>
-                  <div className="rental-info">
-                    <h3>{rental.name}</h3>
-                    <div className="rental-details">
-                      <span>{rental.year}</span>
-                      <span>•</span>
-                      <span>{rental.type}</span>
-                    </div>
-                    <div className="rental-rates">
-                      <span>₹{rental.dailyRate}/day</span>
-                      <span>₹{rental.weeklyRate}/week</span>
-                    </div>
-                  </div>
-                </Link>
-              </motion.div>
-            ))}
-          </div>
-          <div className="section-footer">
-            <Link to="/rent" className="btn btn-primary">View All Rentals</Link>
-          </div>
-        </div>
-      </section>
+      {showBookingModal && selectedRental && (
+        <BookingModal
+          rental={selectedRental}
+          onClose={() => {
+            setShowBookingModal(false)
+            setSelectedRental(null)
+          }}
+        />
+      )}
 
-      {/* CTA Section */}
-      <section className="cta-section">
-        <div className="container">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="cta-content"
-          >
-            <h2>Know Your Car's Value</h2>
-            <p>Use our AI-powered price predictor to get an instant valuation</p>
-            <Link to="/price-predictor" className="btn btn-primary">Get Price Estimate</Link>
-          </motion.div>
-        </div>
-      </section>
+      <ComparisonBar onCompare={() => setShowCompareModal(true)} />
+
+      {showCompareModal && (
+        <CompareModal
+          cars={compareList}
+          onClose={() => setShowCompareModal(false)}
+          onRemove={toggleCompare}
+        />
+      )}
     </div>
   )
 }
 
 export default Home
-

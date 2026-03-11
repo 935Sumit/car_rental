@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react'
-import { mockCars, mockRentals } from '../data/mockData'
+import { mockRentals } from '../data/mockData'
 
 const CarContext = createContext()
 
@@ -12,75 +12,136 @@ export const useCarContext = () => {
 }
 
 export const CarProvider = ({ children }) => {
-  const [cars, setCars] = useState([])
-  const [rentals, setRentals] = useState([])
-  const [searchQuery, setSearchQuery] = useState('')
-  const [filters, setFilters] = useState({
-    brand: '',
-    year: '',
-    condition: '',
-    minPrice: '',
-    maxPrice: '',
-    type: ''
+  const [rentals, setRentals] = useState(mockRentals)
+  const [bookings, setBookings] = useState(() => {
+    const savedBookings = localStorage.getItem('vantage_bookings')
+    return savedBookings ? JSON.parse(savedBookings) : []
   })
+  const [savedCars, setSavedCars] = useState(() => {
+    const saved = localStorage.getItem('saved_cars')
+    return saved ? JSON.parse(saved) : []
+  })
+  const [searchQuery, setSearchQuery] = useState('')
+  const [typeFilter, setTypeFilter] = useState('All')
 
   useEffect(() => {
-    // Load mock data
-    setCars(mockCars)
-    setRentals(mockRentals)
-  }, [])
+    localStorage.setItem('vantage_bookings', JSON.stringify(bookings))
+  }, [bookings])
 
-  const addCar = (car) => {
-    const newCar = {
-      ...car,
-      id: Date.now().toString(),
-      dateAdded: new Date().toISOString()
-    }
-    setCars([...cars, newCar])
-    return newCar
+  useEffect(() => {
+    localStorage.setItem('saved_cars', JSON.stringify(savedCars))
+  }, [savedCars])
+
+  const checkAvailability = (carId, startDate, endDate) => {
+    const newStart = new Date(startDate)
+    const newEnd = new Date(endDate)
+
+    // Overlap logic: new_start < existing_end AND new_end > existing_start
+    const hasOverlap = bookings.some(booking => {
+      if (booking.carId !== carId) return false
+
+      const existingStart = new Date(booking.startDate)
+      const existingEnd = new Date(booking.endDate)
+
+      return newStart <= existingEnd && newEnd >= existingStart
+    })
+
+    return !hasOverlap
   }
 
-  const addRental = (rental) => {
-    const newRental = {
-      ...rental,
+  const addBooking = (bookingData) => {
+    const newBooking = {
+      ...bookingData,
       id: Date.now().toString(),
-      dateAdded: new Date().toISOString()
+      bookingDate: new Date().toISOString()
     }
-    setRentals([...rentals, newRental])
-    return newRental
+    setBookings(prev => [...prev, newBooking])
+    return newBooking
   }
 
-  const getFilteredCars = () => {
-    return cars.filter(car => {
-      const matchesSearch = !searchQuery || 
-        car.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        car.brand.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        car.model.toLowerCase().includes(searchQuery.toLowerCase())
-      
-      const matchesBrand = !filters.brand || car.brand === filters.brand
-      const matchesYear = !filters.year || car.year === parseInt(filters.year)
-      const matchesCondition = !filters.condition || car.condition === filters.condition
-      const matchesMinPrice = !filters.minPrice || car.price >= parseFloat(filters.minPrice)
-      const matchesMaxPrice = !filters.maxPrice || car.price <= parseFloat(filters.maxPrice)
-      const matchesType = !filters.type || car.type === filters.type
+  const cancelBooking = (bookingId) => {
+    setBookings(prev => prev.filter(b => b.id !== bookingId))
+  }
 
-      return matchesSearch && matchesBrand && matchesYear && matchesCondition && 
-             matchesMinPrice && matchesMaxPrice && matchesType
+  const extendBooking = (bookingId, newEndDate, extraDays, extraPayment) => {
+    setBookings(prev => prev.map(b => {
+      if (b.id === bookingId) {
+        return {
+          ...b,
+          endDate: newEndDate,
+          extraDays: (b.extraDays || 0) + extraDays,
+          remainingPayment: (b.remainingPayment || 0) + extraPayment,
+          status: 'Extended'
+        }
+      }
+      return b
+    }))
+  }
+
+  const toggleSaveCar = (car) => {
+    setSavedCars(prev => {
+      const isSaved = prev.some(c => c.id === car.id)
+      if (isSaved) {
+        return prev.filter(c => c.id !== car.id)
+      } else {
+        return [...prev, car]
+      }
+    })
+  }
+
+  const isCarSaved = (carId) => {
+    return savedCars.some(c => c.id === carId)
+  }
+
+  const filteredRentals = rentals.filter(rental => {
+    const matchesSearch = !searchQuery ||
+      rental.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      rental.brand.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      rental.city.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      rental.type.toLowerCase().includes(searchQuery.toLowerCase())
+
+    const matchesType = typeFilter === 'All' || rental.type === typeFilter
+
+    return matchesSearch && matchesType
+  })
+
+  const [compareList, setCompareList] = useState([])
+
+  const toggleCompare = (car) => {
+    setCompareList(prev => {
+      const isComparing = prev.find(c => c.id === car.id)
+      if (isComparing) {
+        return prev.filter(c => c.id !== car.id)
+      } else {
+        if (prev.length >= 3) {
+          alert('You can only compare up to 3 cars at a time.')
+          return prev
+        }
+        return [...prev, car]
+      }
     })
   }
 
   const value = {
-    cars,
     rentals,
+    bookings,
+    savedCars,
+    compareList,
+    setCompareList,
+    toggleCompare,
     searchQuery,
     setSearchQuery,
-    filters,
-    setFilters,
-    addCar,
-    addRental,
-    getFilteredCars
+    typeFilter,
+    setTypeFilter,
+    filteredRentals,
+    checkAvailability,
+    addBooking,
+    cancelBooking,
+    extendBooking,
+    toggleSaveCar,
+    isCarSaved,
+    setSavedCars
   }
 
   return <CarContext.Provider value={value}>{children}</CarContext.Provider>
 }
-

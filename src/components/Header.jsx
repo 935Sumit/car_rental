@@ -9,7 +9,12 @@ const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const location = useLocation()
 
+  const [currentUser, setCurrentUser] = useState(null)
+
   useEffect(() => {
+    const user = JSON.parse(localStorage.getItem('currentUser'))
+    setCurrentUser(user)
+
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50)
     }
@@ -17,11 +22,17 @@ const Header = () => {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
+  const handleLogout = () => {
+    localStorage.removeItem('currentUser')
+    setCurrentUser(null)
+    window.location.reload()
+  }
+
   const isActive = (path) => location.pathname === path
 
   return (
     <header className={`header ${isScrolled ? 'scrolled' : ''}`}>
-      <div className="container">
+      <div className="header-container">
         <div className="header-content">
           <Link to="/" className="logo">
             <motion.div
@@ -30,72 +41,76 @@ const Header = () => {
               className="logo-container"
             >
               <img src={logo} alt="Vintage Riders Hub Logo" className="logo-image" />
-              <span className="logo-text">Vintage Riders Hub</span>
+              <span className="logo-text">Vintage Rides Hub</span>
             </motion.div>
           </Link>
 
           <nav className={`nav ${isMobileMenuOpen ? 'open' : ''}`}>
-            <Link 
-              to="/" 
+            <Link
+              to="/"
               className={`nav-link ${isActive('/') ? 'active' : ''}`}
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Home
             </Link>
-            <Link 
-              to="/buy" 
-              className={`nav-link ${isActive('/buy') ? 'active' : ''}`}
+            <Link
+              to="/saved"
+              className={`nav-link ${isActive('/saved') ? 'active' : ''}`}
               onClick={() => setIsMobileMenuOpen(false)}
             >
-              Buy Cars
+              Saved Cars
             </Link>
-            <Link 
-              to="/sell" 
-              className={`nav-link ${isActive('/sell') ? 'active' : ''}`}
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Sell Cars
-            </Link>
-            <Link 
-              to="/rent" 
-              className={`nav-link ${isActive('/rent') ? 'active' : ''}`}
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Rentals
-            </Link>
-            <Link 
-              to="/price-predictor" 
-              className={`nav-link ${isActive('/price-predictor') ? 'active' : ''}`}
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Price Predictor
-            </Link>
-            <Link 
-              to="/contact" 
+            <Link
+              to="/contact"
               className={`nav-link ${isActive('/contact') ? 'active' : ''}`}
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Contact
             </Link>
-            <div className="auth-links">
-              <Link 
-                to="/login" 
-                className="btn btn-outline-small"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Login
-              </Link>
-              <Link 
-                to="/signup" 
-                className="btn btn-primary-small"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Sign Up
-              </Link>
-            </div>
+            {currentUser ? (
+              <>
+                <Link
+                  to="/my-bookings"
+                  className={`nav-link ${isActive('/my-bookings') ? 'active' : ''}`}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  My Bookings
+                </Link>
+                <Link
+                  to="/profile"
+                  className={`nav-link ${isActive('/profile') ? 'active' : ''}`}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  My Profile
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="logout-btn"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <div className="auth-links">
+                <Link
+                  to="/login"
+                  className="btn btn-outline-small"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Login
+                </Link>
+                <Link
+                  to="/signup"
+                  className="btn btn-primary-small"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Sign Up
+                </Link>
+              </div>
+            )}
           </nav>
 
-          <button 
+          <button
             className="mobile-menu-toggle"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             aria-label="Toggle menu"
@@ -111,4 +126,3 @@ const Header = () => {
 }
 
 export default Header
-

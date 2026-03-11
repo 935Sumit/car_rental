@@ -216,14 +216,43 @@
   font-size: 18px;
 }
 
-.rental-info .btn {
-  width: 100%;
+.rental-actions-grid {
+  display: flex;
+  gap: 12px;
   margin-top: auto;
 }
 
-.rental-info .btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+.rental-actions-grid .btn {
+  flex: 1;
+  margin-top: 0;
+}
+
+.btn-compare-rent {
+  background: transparent;
+  border: 1.5px solid var(--primary-color);
+  width: 46px;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 0;
+  color: var(--primary-color);
+  font-size: 1.6rem;
+}
+
+.btn-compare-rent:hover {
+  background: rgba(88, 71, 56, 0.05);
+  border-color: var(--secondary-color);
+  color: var(--secondary-color);
+}
+
+.btn-compare-rent.active {
+  background: var(--secondary-color);
+  border-color: var(--secondary-color);
+  color: #fff;
 }
 
 .no-rentals {
@@ -246,4 +275,3 @@
     grid-template-columns: 1fr;
   }
 }
-

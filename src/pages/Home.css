@@ -2,462 +2,405 @@
   padding-top: 80px;
 }
 
-/* Hero Section */
 .hero {
-  background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 50%, #2c2c2c 100%);
-  color: var(--bg-white);
-  padding: 120px 0 80px;
   position: relative;
+  background: linear-gradient(rgba(88, 71, 56, 0.4), rgba(88, 71, 56, 0.5)),
+    url('https://images.unsplash.com/photo-1510903117032-f1596c327647?q=80&w=2070&auto=format&fit=crop');
+  background-size: cover;
+  background-position: center;
+  color: #fff;
+  padding: 120px 0 100px;
+  text-align: center;
   overflow: hidden;
-  min-height: 85vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
 }
 
-.hero::before {
+.hero-content {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 24px;
+  position: relative;
+  z-index: 2;
+}
+
+.hero h1 {
+  font-size: 4.5rem;
+  margin-bottom: 28px;
+  font-weight: 800;
+  color: var(--bg-cream);
+  text-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  line-height: 1.05;
+}
+
+.gradient-text {
+  background: linear-gradient(90deg, var(--secondary-color), #fff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 15px rgba(181, 158, 125, 0.4));
+}
+
+.hero p {
+  font-size: 1.4rem;
+  color: rgba(241, 234, 218, 0.9);
+  margin-bottom: 60px;
+  max-width: 750px;
+  margin-left: auto;
+  margin-right: auto;
+  text-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  line-height: 1.6;
+  font-weight: 500;
+}
+
+.hero-search-container {
+  max-width: 720px;
+  margin: 0 auto;
+  filter: drop-shadow(0 20px 50px rgba(0, 0, 0, 0.25));
+}
+
+.filters-section {
+  padding: 40px 0 20px;
+  background: var(--bg-cream);
+  position: relative;
+}
+
+.filters-section::before {
   content: '';
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
-  bottom: 0;
-  background-image: 
-    radial-gradient(circle at 20% 50%, rgba(212, 175, 55, 0.15) 0%, transparent 50%),
-    radial-gradient(circle at 80% 80%, rgba(212, 175, 55, 0.1) 0%, transparent 50%),
-    url('data:image/svg+xml,<svg width="60" height="60" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse"><path d="M 60 0 L 0 0 0 60" fill="none" stroke="rgba(212,175,55,0.03)" stroke-width="1"/></pattern></defs><rect width="100%" height="100%" fill="url(%23grid)"/></svg>');
-  animation: heroGradient 15s ease infinite;
+  height: 100px;
+  background: linear-gradient(to bottom, rgba(88, 71, 56, 0.05), transparent);
+  pointer-events: none;
 }
 
-@keyframes heroGradient {
-  0%, 100% { opacity: 0.6; }
-  50% { opacity: 0.8; }
+.filter-chips {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 
-.hero-overlay {
+.filter-chip {
+  padding: 12px 28px;
+  border-radius: 50px;
+  border: 1.5px solid var(--accent-color);
+  background: #fff;
+  color: var(--primary-color);
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.filter-chip:hover {
+  border-color: var(--secondary-color);
+  background: var(--bg-cream);
+  transform: translateY(-2px);
+}
+
+.filter-chip.active {
+  background: var(--primary-color);
+  color: #fff;
+  border-color: var(--primary-color);
+  box-shadow: 0 4px 15px rgba(88, 71, 56, 0.3);
+}
+
+.car-listing {
+  padding: 40px 0 100px;
+  background: var(--bg-cream);
+}
+
+.rental-cards-grid {
+  display: grid;
+  gap: 32px;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.rental-card-home {
+  background: #fff;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(88, 71, 56, 0.08);
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid rgba(206, 193, 168, 0.3);
+  position: relative;
+}
+
+.rental-card-home:hover {
+  transform: translateY(-12px);
+  box-shadow: 0 20px 50px rgba(88, 71, 56, 0.15);
+  border-color: var(--secondary-color);
+}
+
+.rc-image-wrapper {
+  position: relative;
+  height: 220px;
+  background: linear-gradient(to bottom, #fff, var(--bg-cream));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  overflow: hidden;
+}
+
+.rc-image-wrapper::after {
+  content: '';
   position: absolute;
-  top: 0;
+  bottom: 0;
   left: 0;
   right: 0;
-  bottom: 0;
-  background: url('https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=1920&q=80') center/cover no-repeat;
-  opacity: 0.08;
-  z-index: 0;
+  height: 50%;
+  background: linear-gradient(to top, rgba(206, 193, 168, 0.1), transparent);
 }
 
-.hero-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 20px;
-  position: relative;
-  z-index: 1;
+.rc-image {
+  max-width: 90%;
+  max-height: 90%;
+  object-fit: contain;
+  transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.hero-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: rgba(212, 175, 55, 0.1);
-  border: 1px solid rgba(212, 175, 55, 0.3);
-  padding: 10px 20px;
+.rental-card-home:hover .rc-image {
+  transform: scale(1.1) rotate(-1deg);
+}
+
+.rc-availability {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  padding: 6px 14px;
   border-radius: 50px;
-  margin-bottom: 24px;
-  font-size: 14px;
-  color: var(--primary-color);
-  font-weight: 500;
-}
-
-.hero-text h1 {
-  font-size: 72px;
-  margin-bottom: 24px;
-  background: linear-gradient(135deg, #ffffff 0%, var(--primary-color) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  line-height: 1.1;
-  font-weight: 700;
-  letter-spacing: -2px;
-}
-
-.hero-text p {
-  font-size: 20px;
-  margin-bottom: 40px;
-  color: rgba(255, 255, 255, 0.85);
-  line-height: 1.7;
-  max-width: 600px;
-}
-
-.hero-buttons {
-  display: flex;
-  gap: 20px;
-  flex-wrap: wrap;
-}
-
-.hero-stats {
-  display: flex;
-  gap: 40px;
-  margin-top: 50px;
-  flex-wrap: wrap;
-}
-
-.stat-item {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.stat-item strong {
-  font-size: 32px;
-  font-weight: 700;
-  color: var(--primary-color);
-  font-family: 'Playfair Display', serif;
-}
-
-.stat-item span {
-  font-size: 14px;
-  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.7rem;
+  font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 1px;
-  font-weight: 500;
-}
-
-.hero-search {
-  max-width: 1200px;
-  margin: 60px auto 0;
-  padding: 0 20px;
-  position: relative;
+  letter-spacing: 0.5px;
   z-index: 2;
 }
 
-/* Stats Section */
-.stats-section {
-  background: var(--bg-white);
-  padding: 60px 0;
-  box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.05);
+.rc-availability.available {
+  background: #6d7a4d;
+  color: #fff;
 }
 
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 30px;
+.rc-availability.unavailable {
+  background: #b85c5c;
+  color: #fff;
 }
 
-.stat-card {
-  text-align: center;
-  padding: 30px;
-  background: var(--bg-light);
-  border-radius: 10px;
-  transition: all 0.3s ease;
-  cursor: pointer;
+.rc-type-badge {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--primary-color);
+  padding: 6px 14px;
+  border-radius: 50px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  z-index: 2;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
-.stat-card:hover {
-  background: var(--primary-color);
-  color: var(--secondary-color);
-  transform: translateY(-5px);
-  box-shadow: var(--shadow-lg);
+.rc-body {
+  padding: 28px;
+  background: #fff;
 }
 
-.stat-number {
-  font-size: 48px;
+.rc-header {
+  margin-bottom: 20px;
+}
+
+.rc-name {
+  font-size: 1.4rem;
   font-weight: 700;
   color: var(--primary-color);
-  margin-bottom: 10px;
-  font-family: 'Playfair Display', serif;
+  margin-bottom: 6px;
+  font-family: 'Cormorant Garamond', serif;
 }
 
-.stat-card:hover .stat-number {
+.rc-specs {
+  display: flex;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+  align-items: center;
+  font-weight: 500;
+}
+
+.rc-specs .separator {
+  color: var(--accent-color);
+}
+
+.rc-brand {
+  font-size: 0.9rem;
   color: var(--secondary-color);
-}
-
-.stat-label {
-  font-size: 16px;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 1px;
 }
 
-/* Featured Section */
-.featured-section {
-  background: var(--bg-white);
-}
-
-.section-header {
-  text-align: center;
-  margin-bottom: 50px;
-}
-
-.section-header h2 {
-  font-size: 42px;
-  margin-bottom: 15px;
-  color: var(--secondary-color);
-}
-
-.section-header p {
-  font-size: 18px;
-  color: var(--text-secondary);
-}
-
-.cars-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 30px;
-  margin-bottom: 50px;
-}
-
-.car-card {
-  background: var(--bg-white);
-  border-radius: 15px;
-  overflow: hidden;
-  box-shadow: var(--shadow);
-  transition: all 0.3s ease;
-  display: block;
-}
-
-.car-card:hover {
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-10px);
-}
-
-.car-image {
-  position: relative;
-  width: 100%;
-  height: 250px;
-  overflow: hidden;
-  background: var(--bg-light);
-}
-
-.car-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.3s ease;
-}
-
-.car-card:hover .car-image img {
-  transform: scale(1.1);
-}
-
-.car-badge {
-  position: absolute;
-  top: 15px;
-  right: 15px;
-  background: var(--primary-color);
-  color: var(--secondary-color);
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.car-info {
-  padding: 20px;
-}
-
-.car-info h3 {
-  font-size: 22px;
-  margin-bottom: 10px;
-  color: var(--secondary-color);
-}
-
-.car-details {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  color: var(--text-secondary);
-  font-size: 14px;
-  margin-bottom: 15px;
-}
-
-.car-price {
-  font-size: 28px;
-  font-weight: 700;
-  color: var(--primary-color);
-  font-family: 'Playfair Display', serif;
-}
-
-.section-footer {
-  text-align: center;
-}
-
-/* Rental Section */
-.rental-section {
-  background: var(--bg-light);
-}
-
-.rentals-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 30px;
-  margin-bottom: 50px;
-}
-
-.rental-card {
-  background: var(--bg-white);
-  border-radius: 15px;
-  overflow: hidden;
-  box-shadow: var(--shadow);
-  transition: all 0.3s ease;
-  display: block;
-}
-
-.rental-card:hover {
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-10px);
-}
-
-.rental-image {
-  position: relative;
-  width: 100%;
-  height: 250px;
-  overflow: hidden;
-  background: var(--bg-light);
-}
-
-.rental-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.3s ease;
-}
-
-.rental-card:hover .rental-image img {
-  transform: scale(1.1);
-}
-
-.rental-badge {
-  position: absolute;
-  top: 15px;
-  right: 15px;
-  background: var(--success);
-  color: white;
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.rental-info {
-  padding: 20px;
-}
-
-.rental-info h3 {
-  font-size: 22px;
-  margin-bottom: 10px;
-  color: var(--secondary-color);
-}
-
-.rental-details {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  color: var(--text-secondary);
-  font-size: 14px;
-  margin-bottom: 15px;
-}
-
-.rental-rates {
-  display: flex;
-  gap: 15px;
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--primary-color);
-}
-
-/* CTA Section */
-.cta-section {
-  background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
-  color: var(--secondary-color);
-  padding: 80px 0;
-}
-
-.cta-content {
-  text-align: center;
-  max-width: 700px;
-  margin: 0 auto;
-}
-
-.cta-content h2 {
-  font-size: 42px;
+.rc-info {
   margin-bottom: 20px;
 }
 
-.cta-content p {
-  font-size: 20px;
-  margin-bottom: 30px;
-  opacity: 0.9;
+.rc-location {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.95rem;
+  color: var(--text-secondary);
 }
 
-@media (max-width: 968px) {
-  .hero {
-    min-height: auto;
-    padding: 100px 0 60px;
-  }
+.rc-price-section {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-bottom: 24px;
+}
 
-  .hero-text h1 {
-    font-size: 48px;
-  }
+.rc-price {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--primary-color);
+}
 
-  .hero-text p {
-    font-size: 18px;
-  }
+.rc-label {
+  font-size: 0.95rem;
+  color: var(--text-light);
+  font-weight: 500;
+}
 
-  .hero-stats {
-    gap: 30px;
-    justify-content: center;
-  }
+.rc-actions {
+  display: flex;
+  gap: 12px;
+}
 
-  .hero-buttons {
-    justify-content: center;
-  }
+.btn-save-bookmark {
+  background: transparent;
+  border: 1.5px solid var(--primary-color);
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 0;
+}
 
-  .cars-grid,
-  .rentals-grid {
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 20px;
+.btn-save-bookmark svg {
+  width: 18px;
+  height: 18px;
+  stroke: var(--primary-color);
+  fill: none;
+  stroke-width: 2;
+}
+
+.btn-save-bookmark:hover {
+  background: rgba(88, 71, 56, 0.05);
+  border-color: var(--secondary-color);
+}
+
+.btn-save-bookmark.saved {
+  background: var(--secondary-color);
+  border-color: var(--secondary-color);
+}
+
+.btn-save-bookmark.saved svg {
+  stroke: #fff;
+  fill: #fff;
+}
+
+.btn-save-bookmark:hover {
+  background: #fff;
+  border-color: var(--secondary-color);
+  transform: scale(1.05);
+}
+
+.btn-save-bookmark.saved {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.btn-save-bookmark.saved svg {
+  stroke: var(--secondary-color);
+  fill: var(--secondary-color);
+}
+
+.btn-compare-card {
+  background: transparent;
+  border: 1.5px solid var(--primary-color);
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 0;
+  color: var(--primary-color);
+  font-size: 1.4rem;
+}
+
+.btn-compare-card:hover {
+  background: rgba(88, 71, 56, 0.05);
+  border-color: var(--secondary-color);
+  color: var(--secondary-color);
+}
+
+.btn-compare-card.active {
+  background: var(--secondary-color);
+  border-color: var(--secondary-color);
+  color: #fff;
+}
+
+.btn-book {
+  flex: 1;
+  padding: 14px;
+  border-radius: 12px;
+  font-weight: 800;
+  font-size: 0.9rem;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  background: var(--primary-color);
+  color: #fff;
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.btn-book:hover {
+  background: var(--primary-dark);
+  box-shadow: 0 4px 15px rgba(88, 71, 56, 0.2);
+}
+
+@media (max-width: 1200px) {
+  .rental-cards-grid {
+    gap: 24px;
   }
 }
 
-@media (max-width: 480px) {
-  .hero-text h1 {
-    font-size: 36px;
-    letter-spacing: -1px;
+@media (max-width: 992px) {
+  .rental-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
+}
 
-  .hero-text p {
-    font-size: 16px;
-  }
-
-  .stat-item strong {
-    font-size: 24px;
-  }
-
-  .stat-item span {
-    font-size: 12px;
-  }
-
-  .hero-buttons {
-    flex-direction: column;
-    width: 100%;
-  }
-
-  .hero-buttons .btn {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .hero-badge {
-    font-size: 12px;
-    padding: 8px 16px;
-  }
-
-  .section-header h2 {
-    font-size: 32px;
-  }
-
-  .cars-grid,
-  .rentals-grid {
+@media (max-width: 768px) {
+  .rental-cards-grid {
     grid-template-columns: 1fr;
+    max-width: 450px;
+    margin: 0 auto;
+  }
+
+  .hero h1 {
+    font-size: 2.8rem;
   }
 }
-

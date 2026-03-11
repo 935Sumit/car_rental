@@ -1,0 +1,103 @@
+.comparison-bar {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--primary-color);
+    color: #fff;
+    padding: 15px 30px;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    z-index: 2500;
+    width: auto;
+    max-width: 90vw;
+}
+
+.bar-content {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+}
+
+.selected-cars {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.selected-car-chip {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 5px 12px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.selected-car-chip img {
+    height: 30px;
+    width: auto;
+    object-fit: contain;
+}
+
+.selected-car-chip button {
+    background: none;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    opacity: 0.7;
+    transition: opacity 0.3s;
+}
+
+.selected-car-chip button:hover {
+    opacity: 1;
+}
+
+.empty-slot {
+    font-size: 0.8rem;
+    opacity: 0.6;
+    font-style: italic;
+}
+
+.btn-compare-now {
+    background: var(--secondary-color);
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-compare-now:hover:not(:disabled) {
+    background: #fff;
+    color: var(--primary-color);
+    transform: translateY(-2px);
+}
+
+.btn-compare-now:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+    .bar-content {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .selected-cars {
+        overflow-x: auto;
+        width: 100%;
+        padding-bottom: 5px;
+    }
+}

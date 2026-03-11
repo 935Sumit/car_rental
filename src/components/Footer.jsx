@@ -1,4 +1,6 @@
 import { Link } from 'react-router-dom'
+import { HiMail, HiPhone, HiLocationMarker } from 'react-icons/hi'
+import { FaFacebookF, FaInstagram, FaTwitter } from 'react-icons/fa'
 import './Footer.css'
 
 const Footer = () => {
@@ -7,13 +9,12 @@ const Footer = () => {
       <div className="container">
         <div className="footer-content">
           <div className="footer-section">
-            <h3>Vintage Riders Hub</h3>
-            <p>Your premier destination for classic and vintage automobiles. Buy, sell, or rent the car of your dreams.</p>
+            <h3>Vintage Rides Hub</h3>
+            <p>Your premier destination for premium car rentals in Anand, Gujarat. Experience luxury and comfort on every ride.</p>
             <div className="social-links">
-              <a href="#" aria-label="Facebook" className="social-icon facebook">f</a>
-              <a href="#" aria-label="Instagram" className="social-icon instagram">in</a>
-              <a href="#" aria-label="Twitter" className="social-icon twitter">t</a>
-              <a href="#" aria-label="YouTube" className="social-icon youtube">yt</a>
+              <a href="#" aria-label="Facebook" className="social-icon"><FaFacebookF /></a>
+              <a href="#" aria-label="Instagram" className="social-icon"><FaInstagram /></a>
+              <a href="#" aria-label="Twitter" className="social-icon"><FaTwitter /></a>
             </div>
           </div>
 
@@ -21,47 +22,34 @@ const Footer = () => {
             <h4>Quick Links</h4>
             <ul>
               <li><Link to="/">Home</Link></li>
-              <li><Link to="/buy">Buy Cars</Link></li>
-              <li><Link to="/sell">Sell Cars</Link></li>
-              <li><Link to="/rent">Rentals</Link></li>
-              <li><Link to="/price-predictor">Price Predictor</Link></li>
-            </ul>
-          </div>
-
-          <div className="footer-section">
-            <h4>Services</h4>
-            <ul>
-              <li><Link to="/rent">Car Rentals</Link></li>
+              <li><Link to="/saved">Saved Cars</Link></li>
+              <li><Link to="/profile">My Profile</Link></li>
               <li><Link to="/contact">Contact Us</Link></li>
-              <li><a href="#">Vehicle Appraisal</a></li>
-              <li><a href="#">Financing Options</a></li>
-              <li><a href="#">Insurance</a></li>
             </ul>
           </div>
 
           <div className="footer-section">
-            <h4>Support</h4>
+            <h4>Rental Types</h4>
             <ul>
-              <li><Link to="/contact">Help Center</Link></li>
-              <li><a href="#">FAQs</a></li>
-              <li><a href="#">Terms & Conditions</a></li>
-              <li><a href="#">Privacy Policy</a></li>
-              <li><a href="#">Returns & Refunds</a></li>
+              <li><Link to="/">Hatchback</Link></li>
+              <li><Link to="/">Sedan</Link></li>
+              <li><Link to="/">SUV</Link></li>
+              <li><Link to="/">Luxury</Link></li>
             </ul>
           </div>
 
           <div className="footer-section">
             <h4>Contact Info</h4>
             <ul className="contact-info">
-              <li><span className="icon-email"></span> info@vintageridershub.com</li>
-              <li><span className="icon-phone"></span> +1 (555) 123-4567</li>
-              <li><span className="icon-location"></span> 123 Classic Car Avenue, Los Angeles, CA 90001</li>
+              <li><HiMail /> support@vintagerides.in</li>
+              <li><HiPhone /> +91 98765 43210</li>
+              <li><HiLocationMarker /> Anand, Gujarat - 388001</li>
             </ul>
           </div>
         </div>
 
         <div className="footer-bottom">
-          <p>&copy; 2024 Vintage Riders Hub. All rights reserved.</p>
+          <p>&copy; 2026 Vintage Rides Hub. All rights reserved.</p>
         </div>
       </div>
     </footer>
@@ -69,4 +57,3 @@ const Footer = () => {
 }
 
 export default Footer
-

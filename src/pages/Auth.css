@@ -23,11 +23,16 @@
 }
 
 .auth-container {
-  max-width: 450px;
+  /* allow larger width on desktop, form will center in grid */
+  max-width: 800px;
   width: 100%;
   position: relative;
   z-index: 1;
   padding: 20px;
+  display: grid;
+  grid-template-columns: 1fr;
+  align-items: center;
+  gap: 40px;
 }
 
 .auth-card {
@@ -239,13 +244,14 @@
 }
 
 .auth-image {
-  display: none;
+  display: none; /* shown on larger viewports */
 }
 
 @media (max-width: 480px) {
   .auth-container {
     padding: 15px;
     max-width: 100%;
+    display: block;
   }
   
   .auth-card {
@@ -265,4 +271,75 @@
     align-items: flex-start;
     gap: 10px;
   }
+}
+
+/* desktop layout enhancements */
+@media (min-width: 768px) {
+  .auth-container {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .auth-image {
+    display: block;
+    color: var(--bg-white);
+    padding: 30px;
+  }
+
+  .auth-card {
+    padding: 35px 45px;
+  }
+}
+
+/* helper styles for the illustration/content area */
+.image-content h2 {
+  font-size: 42px;
+  margin-bottom: 18px;
+  background: linear-gradient(135deg, #ffffff 0%, var(--primary-color) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-family: 'Playfair Display', serif;
+  line-height: 1.2;
+}
+
+.image-content > p {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.85);
+  margin-bottom: 30px;
+  line-height: 1.6;
+}
+
+.features {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  border: 1px solid rgba(212, 175, 55, 0.2);
+}
+
+.feature-item .icon {
+  width: 28px;
+  height: 28px;
+  background: var(--primary-color);
+  color: var(--secondary-color);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  flex-shrink: 0;
+  font-size: 14px;
+}
+
+.feature-item span:last-child {
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.9);
 }

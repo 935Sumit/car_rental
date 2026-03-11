@@ -1,0 +1,189 @@
+.compare-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(88, 71, 56, 0.3);
+    backdrop-filter: blur(5px);
+    z-index: 3000;
+    display: flex;
+    align-items: flex-end;
+}
+
+.compare-modal {
+    width: 100%;
+    background: #fff;
+    border-radius: 30px 30px 0 0;
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.1);
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.compare-header {
+    padding: 20px 40px;
+    border-bottom: 2px solid var(--bg-cream);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.compare-header h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2rem;
+    color: var(--primary-color);
+    margin: 0;
+}
+
+.close-btn {
+    background: var(--bg-cream);
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-color);
+    font-size: 1.2rem;
+    transition: all 0.3s ease;
+}
+
+.close-btn:hover {
+    background: var(--secondary-color);
+    color: #fff;
+}
+
+.compare-content {
+    padding: 40px;
+    overflow-x: auto;
+}
+
+.compare-table {
+    display: flex;
+    min-width: 800px;
+}
+
+.compare-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.labels-col {
+    flex: 0.5;
+    min-width: 150px;
+    border-right: 2px solid var(--bg-cream);
+}
+
+.car-header-stub {
+    height: 200px;
+}
+
+.spec-label {
+    height: 60px;
+    display: flex;
+    align-items: center;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+    padding: 0 20px;
+    gap: 10px;
+}
+
+.spec-icon {
+    color: var(--secondary-color);
+    font-size: 1.1rem;
+}
+
+.car-col {
+    border-right: 1px solid var(--bg-cream);
+    text-align: center;
+}
+
+.car-col:last-child {
+    border-right: none;
+}
+
+.car-header-compare {
+    height: 200px;
+    padding: 20px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.remove-car {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(184, 92, 92, 0.1);
+    border: none;
+    color: #b85c5c;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    transition: all 0.3s ease;
+}
+
+.remove-car:hover {
+    background: #b85c5c;
+    color: #fff;
+}
+
+.car-img-container {
+    height: 100px;
+    margin-bottom: 15px;
+}
+
+.car-img-container img {
+    height: 100%;
+    width: auto;
+    object-fit: contain;
+}
+
+.car-header-compare h4 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.4rem;
+    margin: 0;
+    color: var(--primary-color);
+}
+
+.spec-value {
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    color: var(--primary-color);
+    padding: 0 20px;
+    border-top: 1px solid rgba(181, 158, 125, 0.1);
+}
+
+.text-success {
+    color: #6d7a4d;
+}
+
+.text-error {
+    color: #b85c5c;
+}
+
+@media (max-width: 768px) {
+    .compare-content {
+        padding: 20px;
+    }
+
+    .compare-table {
+        min-width: 600px;
+    }
+}

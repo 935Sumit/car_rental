@@ -1,221 +1,123 @@
-import { useState } from 'react'
 import { motion } from 'framer-motion'
+import { HiPhone, HiChatAlt2, HiMail, HiLocationMarker } from 'react-icons/hi'
 import './Contact.css'
 
 const Contact = () => {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    subject: '',
-    message: ''
-  })
-  const [submitted, setSubmitted] = useState(false)
-
-  const handleChange = (e) => {
-    const { name, value } = e.target
-    setFormData({ ...formData, [name]: value })
-  }
-
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    // In a real app, this would send data to a backend
-    setSubmitted(true)
-    setTimeout(() => {
-      setSubmitted(false)
-      setFormData({
-        name: '',
-        email: '',
-        phone: '',
-        subject: '',
-        message: ''
-      })
-    }, 3000)
-  }
+  const faqs = [
+    {
+      q: "How do I book a rental car?",
+      a: "Browse our collection, select your dates, and click 'Book Now'. You'll need to be logged in to complete the booking."
+    },
+    {
+      q: "What documents are required?",
+      a: "A valid driving license, Aadhaar card, and a security deposit are required at the time of pickup."
+    },
+    {
+      q: "Are there any hidden charges?",
+      a: "No, our pricing is transparent. The total price shown during booking is what you pay."
+    },
+    {
+      q: "What is your fuel policy?",
+      a: "We provide cars with a full tank, and we expect them to be returned with a full tank."
+    },
+    {
+      q: "Can I cancel my booking?",
+      a: "Yes, you can cancel up to 24 hours before your pickup time for a full refund."
+    }
+  ]
 
   return (
-    <div className="contact">
+    <div className="contact-page">
       <div className="page-header">
         <div className="container">
-          <h1>Contact Us</h1>
-          <p>We're here to help! Get in touch with our team</p>
+          <motion.h1
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            Get in Touch
+          </motion.h1>
+          <p>We're here to help you get on the road</p>
         </div>
       </div>
 
       <div className="container">
-        <div className="contact-content">
+        <div className="contact-grid">
           <motion.div
-            initial={{ opacity: 0, x: -30 }}
+            className="contact-info-cards"
+            initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6 }}
-            className="contact-info"
+            transition={{ delay: 0.2 }}
           >
-            <div className="info-section">
-              <h2>Get in Touch</h2>
-              <p>
-                Have questions about our vintage cars? Need help with a listing? 
-                Want to schedule a viewing? We're here to assist you every step of the way.
-              </p>
+            <div className="contact-card">
+              <div className="card-icon"><HiPhone /></div>
+              <h3>Phone</h3>
+              <p>+91 98765 43210</p>
+              <p>+91 91234 56789</p>
             </div>
 
-            <div className="contact-details">
-              <div className="contact-item">
-                <div className="contact-icon email-icon"></div>
-                <div>
-                  <h3>Email</h3>
-                  <p>info@vintageridershub.com</p>
-                  <p>support@vintageridershub.com</p>
-                </div>
-              </div>
-
-              <div className="contact-item">
-                <div className="contact-icon phone-icon"></div>
-                <div>
-                  <h3>Phone</h3>
-                  <p>+1 (555) 123-4567</p>
-                  <p>Mon-Fri: 9AM - 6PM EST</p>
-                </div>
-              </div>
-
-              <div className="contact-item">
-                <div className="contact-icon location-icon"></div>
-                <div>
-                  <h3>Address</h3>
-                  <p>123 Classic Car Avenue</p>
-                  <p>Los Angeles, CA 90001</p>
-                </div>
-              </div>
-
-              <div className="contact-item">
-                <div className="contact-icon social-icon"></div>
-                <div>
-                  <h3>Social Media</h3>
-                  <div className="social-links">
-                    <a href="#">Facebook</a>
-                    <a href="#">Instagram</a>
-                    <a href="#">Twitter</a>
-                  </div>
-                </div>
-              </div>
+            <div className="contact-card">
+              <div className="card-icon"><HiChatAlt2 /></div>
+              <h3>WhatsApp Support</h3>
+              <p>+91 98765 43210</p>
+              <span>Available 24/7 for support</span>
             </div>
 
-            <div className="faq-section">
-              <h3>Frequently Asked Questions</h3>
-              <div className="faq-item">
-                <strong>How do I list my car for sale?</strong>
-                <p>Simply navigate to the "Sell Cars" page and fill out our listing form with your car's details.</p>
-              </div>
-              <div className="faq-item">
-                <strong>Can I rent a car for my wedding?</strong>
-                <p>Yes! Visit our "Rentals" page to browse available classic cars for your special occasion.</p>
-              </div>
-              <div className="faq-item">
-                <strong>How accurate is the price predictor?</strong>
-                <p>Our AI model provides estimates based on market data. Actual prices may vary based on specific conditions.</p>
-              </div>
+            <div className="contact-card">
+              <div className="card-icon"><HiMail /></div>
+              <h3>Email</h3>
+              <p>support@vintagerides.in</p>
+              <p>info@vintagerides.in</p>
+            </div>
+
+            <div className="contact-card">
+              <div className="card-icon"><HiLocationMarker /></div>
+              <h3>Location</h3>
+              <p>123, Heritage Square</p>
+              <p>Anand, Gujarat - 388001</p>
             </div>
           </motion.div>
 
           <motion.div
-            initial={{ opacity: 0, x: 30 }}
+            className="support-details"
+            initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="contact-form-section"
+            transition={{ delay: 0.3 }}
           >
-            <div className="form-card">
-              <h2>Send us a Message</h2>
-              {submitted ? (
-                <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  className="submission-success"
-                >
-                  <div className="success-icon">
-                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="white"/>
-                    </svg>
-                  </div>
-                  <h3>Message Sent!</h3>
-                  <p>We'll get back to you as soon as possible.</p>
-                </motion.div>
-              ) : (
-                <form onSubmit={handleSubmit} className="contact-form">
-                  <div className="form-group">
-                    <label>Your Name *</label>
-                    <input
-                      type="text"
-                      name="name"
-                      value={formData.name}
-                      onChange={handleChange}
-                      required
-                      placeholder="John Doe"
-                    />
-                  </div>
+            <div className="info-block">
+              <h3>Business Hours</h3>
+              <div className="hours-grid">
+                <span>Monday - Friday:</span> <span>9:00 AM - 9:00 PM</span>
+                <span>Saturday - Sunday:</span> <span>10:00 AM - 6:00 PM</span>
+              </div>
+            </div>
 
-                  <div className="form-group">
-                    <label>Email Address *</label>
-                    <input
-                      type="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      required
-                      placeholder="john@example.com"
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label>Phone Number</label>
-                    <input
-                      type="tel"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleChange}
-                      placeholder="+1 (555) 123-4567"
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label>Subject *</label>
-                    <select
-                      name="subject"
-                      value={formData.subject}
-                      onChange={handleChange}
-                      required
-                    >
-                      <option value="">Select a subject</option>
-                      <option value="general">General Inquiry</option>
-                      <option value="listing">Listing Question</option>
-                      <option value="rental">Rental Inquiry</option>
-                      <option value="support">Technical Support</option>
-                      <option value="other">Other</option>
-                    </select>
-                  </div>
-
-                  <div className="form-group">
-                    <label>Message *</label>
-                    <textarea
-                      name="message"
-                      value={formData.message}
-                      onChange={handleChange}
-                      required
-                      rows="6"
-                      placeholder="Tell us how we can help you..."
-                    />
-                  </div>
-
-                  <button type="submit" className="btn btn-primary">
-                    Send Message
-                  </button>
-                </form>
-              )}
+            <div className="info-block">
+              <h3>Rental Support Info</h3>
+              <p>Our dedicated rental support team is available round the clock to assist you with active bookings, breakdown assistance, and any emergency queries.</p>
+              <ul className="support-list">
+                <li>24/7 Roadside Assistance</li>
+                <li>Instant Booking Confirmations</li>
+                <li>Doorstep Delivery Support</li>
+                <li>Flexible Pickup Options</li>
+              </ul>
             </div>
           </motion.div>
         </div>
+
+        <section className="faq-section">
+          <h2>Frequently Asked Questions</h2>
+          <div className="faq-grid">
+            {faqs.map((faq, idx) => (
+              <div key={idx} className="faq-item">
+                <h4>{faq.q}</h4>
+                <p>{faq.a}</p>
+              </div>
+            ))}
+          </div>
+        </section>
       </div>
     </div>
   )
 }
 
 export default Contact
-

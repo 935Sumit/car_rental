@@ -12,7 +12,7 @@ const SearchBar = () => {
     e.preventDefault()
     if (query.trim()) {
       setSearchQuery(query)
-      navigate('/buy')
+      navigate('/rent')
     }
   }
 
@@ -20,7 +20,7 @@ const SearchBar = () => {
     <form className="search-bar" onSubmit={handleSubmit}>
       <input
         type="text"
-        placeholder="Search for vintage cars, brands, models..."
+        placeholder="Search for rental cars, brands, models..."
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         className="search-input"
@@ -33,4 +33,3 @@ const SearchBar = () => {
 }
 
 export default SearchBar
-
