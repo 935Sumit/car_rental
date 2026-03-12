@@ -78,7 +78,7 @@ const Signup = () => {
 
     // Simulate API call and save to localStorage
     setTimeout(() => {
-      const users = JSON.parse(localStorage.getItem('users') || '[]')
+      const users = JSON.parse(localStorage.getItem('vantage_users') || '[]')
 
       // Check if email already exists
       if (users.find(u => u.email === formData.email)) {
@@ -91,11 +91,13 @@ const Signup = () => {
         fullName: formData.fullName,
         email: formData.email,
         phone: formData.phone,
-        password: formData.password
+        password: formData.password,
+        status: 'active',
+        createdAt: new Date().toISOString()
       }
 
       users.push(newUser)
-      localStorage.setItem('users', JSON.stringify(users))
+      localStorage.setItem('vantage_users', JSON.stringify(users))
 
       setIsLoading(false)
       // Navigate to login page after successful signup

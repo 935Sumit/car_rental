@@ -13,6 +13,8 @@ import CarDetails from './pages/CarDetails'
 import Dashboard from './admin/Dashboard'
 import ManageCars from './admin/ManageCars'
 import ManageBookings from './admin/ManageBookings'
+import ManageUsers from './admin/ManageUsers'
+import BookingCalendar from './admin/BookingCalendar'
 import './App.css'
 
 function App() {
@@ -47,6 +49,8 @@ function App() {
               <Route path="/admin/dashboard" element={<Dashboard />} />
               <Route path="/admin/cars" element={<ManageCars />} />
               <Route path="/admin/bookings" element={<ManageBookings />} />
+              <Route path="/admin/users" element={<ManageUsers />} />
+        <Route path="/admin/calendar" element={<BookingCalendar />} />
               {/* Redirect old routes */}
               <Route path="/rent" element={<Navigate to="/" />} />
             </Routes>

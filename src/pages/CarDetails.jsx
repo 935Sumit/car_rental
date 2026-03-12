@@ -146,10 +146,10 @@ const CarDetails = () => {
                             <div className="action-buttons-group">
                                 <button
                                     className="btn-book-now-large"
-                                    disabled={!agreed || !car.availability}
+                                    disabled={!agreed || car.status !== 'available'}
                                     onClick={handleBookNow}
                                 >
-                                    {car.availability ? 'Book Now' : 'Currently Unavailable'}
+                                    {car.status === 'maintenance' ? 'Under Maintenance' : car.status === 'booked' ? 'Currently Unavailable' : 'Book Now'}
                                 </button>
                                 <button
                                     className={`btn-save-detail ${isCarSaved(car.id) ? 'saved' : ''}`}

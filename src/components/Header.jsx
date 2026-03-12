@@ -70,6 +70,20 @@ const Header = () => {
                 >
                   Bookings
                 </Link>
+                <Link
+                  to="/admin/users"
+                  className={`nav-link ${isActive('/admin/users') ? 'active' : ''}`}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Users
+                </Link>
+                <Link
+                  to="/admin/calendar"
+                  className={`nav-link ${isActive('/admin/calendar') ? 'active' : ''}`}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Schedule
+                </Link>
                 <button
                   onClick={handleLogout}
                   className="logout-btn"

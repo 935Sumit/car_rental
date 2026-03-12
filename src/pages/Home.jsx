@@ -123,8 +123,8 @@ const Home = () => {
               >
                 <div className="rc-image-wrapper">
                   <img src={car.image} alt={car.name} className="rc-image" />
-                  <div className={`rc-availability ${car.availability ? 'available' : 'unavailable'}`}>
-                    {car.availability ? 'Available' : 'Booked'}
+                  <div className={`rc-availability ${car.status === 'available' || (!car.status && car.availability) ? 'available' : 'unavailable'}`}>
+                    {car.status === 'maintenance' ? 'Under Maintenance' : (car.status === 'booked' || (!car.status && !car.availability)) ? 'Not Available' : 'Available'}
                   </div>
                   <div className="rc-type-badge">{car.type}</div>
                 </div>

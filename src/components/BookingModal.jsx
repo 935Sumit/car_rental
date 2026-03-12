@@ -90,9 +90,9 @@ const BookingModal = ({ rental, onClose }) => {
       const updatedUser = { ...currentUser, licenseNumber: licenseToUse }
       localStorage.setItem('currentUser', JSON.stringify(updatedUser))
 
-      const users = JSON.parse(localStorage.getItem('users') || '[]')
+      const users = JSON.parse(localStorage.getItem('vantage_users') || '[]')
       const updatedUsers = users.map(u => u.email === updatedUser.email ? updatedUser : u)
-      localStorage.setItem('users', JSON.stringify(updatedUsers))
+      localStorage.setItem('vantage_users', JSON.stringify(updatedUsers))
     }
 
     // Prepare final booking data
@@ -199,6 +199,16 @@ const BookingModal = ({ rental, onClose }) => {
 
     if (!licenseRegex.test(licenseToUse)) {
       setError('Invalid licence format. Use GJ-05-2023-1234567 format.')
+      return false
+    }
+
+    if (rental.status === 'maintenance') {
+      setError('This car is currently under maintenance and cannot be booked.')
+      return false
+    }
+
+    if (rental.status === 'booked') {
+      setError('This car is currently marked as booked and is not available for new reservations.')
       return false
     }
 

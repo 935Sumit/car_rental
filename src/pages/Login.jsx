@@ -70,10 +70,15 @@ const Login = () => {
         return
       }
 
-      const users = JSON.parse(localStorage.getItem('users') || '[]')
+      const users = JSON.parse(localStorage.getItem('vantage_users') || '[]')
       const user = users.find(u => u.email === formData.email && u.password === formData.password)
-
+      
       if (user) {
+        if (user.status === 'blocked') {
+          setErrors({ auth: 'Your account has been blocked. Please contact support.' })
+          setIsLoading(false)
+          return
+        }
         localStorage.setItem('currentUser', JSON.stringify(user))
         setIsLoading(false)
         navigate('/')

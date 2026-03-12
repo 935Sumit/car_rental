@@ -23,7 +23,8 @@ const ManageCars = () => {
         location: 'Anand',
         description: '',
         chauffeurAvailable: true,
-        mileage: '18'
+        mileage: '18',
+        status: 'available'
     })
     const [imageFile, setImageFile] = useState(null)
 
@@ -70,7 +71,8 @@ const ManageCars = () => {
                 pricePerDay: Number(formData.pricePerDay),
                 seats: Number(formData.seats),
                 city: formData.location,
-                availability: true
+                status: formData.status || 'available',
+                availability: formData.status === 'available'
             }
 
             if (isEditing) {
@@ -100,7 +102,8 @@ const ManageCars = () => {
             location: car.city || car.location || 'Anand',
             description: car.description || '',
             chauffeurAvailable: car.chauffeurAvailable ?? true,
-            mileage: car.mileage || '18'
+            mileage: car.mileage || '18',
+            status: car.status || (car.availability ? 'available' : 'booked')
         })
         setImageFile(null)
         setCurrentCarId(car.id)
@@ -126,7 +129,8 @@ const ManageCars = () => {
             location: 'Anand',
             description: '',
             chauffeurAvailable: true,
-            mileage: '18'
+            mileage: '18',
+            status: 'available'
         })
         setImageFile(null)
         setIsEditing(false)
@@ -159,6 +163,7 @@ const ManageCars = () => {
                                     <th>Price/Day</th>
                                     <th>Fuel</th>
                                     <th>Seats</th>
+                                    <th>Status</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -174,6 +179,14 @@ const ManageCars = () => {
                                             <td>₹{car.pricePerDay}</td>
                                             <td>{car.fuel}</td>
                                             <td>{car.seats}</td>
+                                            <td>
+                                                <span className={`status-badge ${
+                                                    car.status === 'available' ? 'status-approved' : 
+                                                    car.status === 'maintenance' ? 'status-cancelled' : 'status-pending'
+                                                }`}>
+                                                    {car.status ? car.status.charAt(0).toUpperCase() + car.status.slice(1) : (car.availability ? 'Available' : 'Booked')}
+                                                </span>
+                                            </td>
                                             <td className="actions-cell">
                                                 <div className="action-btns-row">
                                                     <button className="btn-edit" onClick={() => handleEdit(car)}>Edit</button>
@@ -251,6 +264,14 @@ const ManageCars = () => {
                                     <select name="chauffeurAvailable" value={formData.chauffeurAvailable} onChange={handleInputChange}>
                                         <option value={true}>Available</option>
                                         <option value={false}>Not Available</option>
+                                    </select>
+                                </div>
+                                <div className="form-group">
+                                    <label>Car Status</label>
+                                    <select name="status" value={formData.status} onChange={handleInputChange}>
+                                        <option value="available">Available</option>
+                                        <option value="booked">Booked</option>
+                                        <option value="maintenance">Maintenance</option>
                                     </select>
                                 </div>
                                 <div className="form-group full-width">

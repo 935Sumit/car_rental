@@ -181,7 +181,7 @@
 }
 
 .rc-availability.available {
-  background: #6d7a4d;
+  background: #2d8a39; /* More vibrant green */
   color: #fff;
 }
 

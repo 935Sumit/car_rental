@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useCarContext } from '../context/CarContext'
+import { HiCalendar } from 'react-icons/hi'
 import './Dashboard.css'
 
 const Dashboard = () => {
@@ -22,10 +23,12 @@ const Dashboard = () => {
     const availableCars = (rentals || []).filter(car => car.availability).length
     const totalRevenue = activeBookings.reduce((sum, b) => sum + (Number(b.totalPrice) || 0), 0)
 
+    const totalUsers = JSON.parse(localStorage.getItem('vantage_users') || localStorage.getItem('users') || '[]').length
+
     const stats = [
         { label: 'Total Cars', value: totalCars.toString() },
         { label: 'Total Bookings', value: totalBookings.toString() },
-        { label: 'Available Cars', value: availableCars.toString() },
+        { label: 'Total Users', value: totalUsers.toString() },
         { label: 'Total Revenue', value: `₹${totalRevenue.toLocaleString()}` }
     ]
 
@@ -53,8 +56,15 @@ const Dashboard = () => {
             <main className="admin-content">
                 <header className="admin-header dashboard-hero">
                     <div className="hero-content">
-                        <h1>Admin Dashboard</h1>
-                        <p className="welcome-text">Greetings, <span className="admin-name">Administrator</span>. Here's your fleet's status at a glance.</p>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                            <div>
+                                <h1>Admin Dashboard</h1>
+                                <p className="welcome-text">Greetings, <span className="admin-name">Administrator</span>. Here's your fleet's status at a glance.</p>
+                            </div>
+                            <Link to="/admin/calendar" className="btn btn-outline" style={{ background: 'var(--bg-white)' }}>
+                                <HiCalendar style={{ marginRight: '8px' }} /> View Schedule
+                            </Link>
+                        </div>
                     </div>
                 </header>
 

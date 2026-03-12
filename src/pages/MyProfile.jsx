@@ -36,9 +36,9 @@ const MyProfile = () => {
         localStorage.setItem('currentUser', JSON.stringify(updatedUser))
 
         // Also update in users list to persist across logins
-        const users = JSON.parse(localStorage.getItem('users') || '[]')
+        const users = JSON.parse(localStorage.getItem('vantage_users') || '[]')
         const updatedUsers = users.map(u => u.email === updatedUser.email ? updatedUser : u)
-        localStorage.setItem('users', JSON.stringify(updatedUsers))
+        localStorage.setItem('vantage_users', JSON.stringify(updatedUsers))
 
         setIsEditingLicense(false)
     }
@@ -50,9 +50,9 @@ const MyProfile = () => {
             setLicenseInput('')
             localStorage.setItem('currentUser', JSON.stringify(updatedUser))
 
-            const users = JSON.parse(localStorage.getItem('users') || '[]')
+            const users = JSON.parse(localStorage.getItem('vantage_users') || '[]')
             const updatedUsers = users.map(u => u.email === updatedUser.email ? updatedUser : u)
-            localStorage.setItem('users', JSON.stringify(updatedUsers))
+            localStorage.setItem('vantage_users', JSON.stringify(updatedUsers))
         }
     }
 

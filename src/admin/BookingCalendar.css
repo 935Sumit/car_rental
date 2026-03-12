@@ -1,0 +1,214 @@
+.booking-calendar-page {
+    padding: 20px;
+}
+
+.calendar-nav-controls {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    background: var(--bg-white);
+    padding: 10px 20px;
+    border-radius: 12px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-color);
+}
+
+.current-month-label {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    min-width: 180px;
+    text-align: center;
+}
+
+.nav-btn {
+    background: var(--bg-cream);
+    color: var(--primary-color);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    transition: all 0.3s ease;
+}
+
+.nav-btn:hover {
+    background: var(--primary-color);
+    color: var(--bg-cream);
+    transform: scale(1.1);
+}
+
+.matrix-container {
+    margin-top: 30px;
+    background: var(--bg-white);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+}
+
+.matrix-wrapper {
+    overflow-x: auto;
+    overflow-y: auto;
+    max-height: 70vh;
+}
+
+.availability-matrix {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.availability-matrix th {
+    background: var(--bg-light);
+    padding: 15px 10px;
+    text-align: center;
+    border-bottom: 2px solid var(--border-color);
+    border-right: 1px solid rgba(181, 158, 125, 0.2);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.day-name {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    font-weight: 700;
+}
+
+.day-number {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--primary-color);
+}
+
+.car-info-th {
+    left: 0;
+    z-index: 20 !important;
+    min-width: 250px;
+    text-align: left !important;
+    padding-left: 20px !important;
+}
+
+.sticky-col {
+    position: sticky;
+    left: 0;
+    background: var(--bg-white);
+    z-index: 5;
+    border-right: 2px solid var(--border-color);
+}
+
+.car-cell {
+    padding: 15px 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.car-mini-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.matrix-thumb {
+    width: 60px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+}
+
+.car-labels {
+    display: flex;
+    flex-direction: column;
+}
+
+.car-m-name {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--primary-color);
+}
+
+.car-m-brand {
+    font-size: 0.75rem;
+    color: var(--secondary-color);
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.matrix-slot {
+    min-width: 60px;
+    border-bottom: 1px solid rgba(181, 158, 125, 0.1);
+    border-right: 1px solid rgba(181, 158, 125, 0.1);
+    padding: 5px;
+    transition: background 0.2s;
+}
+
+.matrix-slot.weekend-cell {
+    background: rgba(181, 158, 125, 0.05);
+}
+
+.availability-matrix th.weekend {
+    background: rgba(181, 158, 125, 0.15);
+}
+
+.matrix-slot.is-booked {
+    background: rgba(88, 71, 56, 0.03);
+}
+
+.booking-indicator {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.booking-tag {
+    background: var(--primary-color);
+    color: #fff;
+    font-size: 0.65rem;
+    font-weight: 800;
+    padding: 8px 4px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.calendar-legend {
+    margin-top: 20px;
+    display: flex;
+    gap: 25px;
+    justify-content: center;
+    padding: 15px;
+    background: var(--bg-white);
+    border-radius: 12px;
+    box-shadow: var(--shadow-sm);
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.color-box {
+    width: 16px;
+    height: 16px;
+    border-radius: 3px;
+    border: 1px solid var(--border-color);
+}
+
+.color-box.available { background: #fff; }
+.color-box.booked { background: var(--primary-color); }
+.color-box.weekend { background: rgba(181, 158, 125, 0.15); }
