@@ -12,17 +12,32 @@ export const useCarContext = () => {
 }
 
 export const CarProvider = ({ children }) => {
-  const [rentals, setRentals] = useState(mockRentals)
+  // Initialize rentals from localStorage or mock data
+  const [rentals, setRentals] = useState(() => {
+    const savedCars = localStorage.getItem('vantage_cars')
+    if (savedCars) {
+      return JSON.parse(savedCars)
+    }
+    return mockRentals
+  })
+
   const [bookings, setBookings] = useState(() => {
     const savedBookings = localStorage.getItem('vantage_bookings')
     return savedBookings ? JSON.parse(savedBookings) : []
   })
+
   const [savedCars, setSavedCars] = useState(() => {
     const saved = localStorage.getItem('saved_cars')
     return saved ? JSON.parse(saved) : []
   })
+
   const [searchQuery, setSearchQuery] = useState('')
   const [typeFilter, setTypeFilter] = useState('All')
+
+  // Persist data to localStorage
+  useEffect(() => {
+    localStorage.setItem('vantage_cars', JSON.stringify(rentals))
+  }, [rentals])
 
   useEffect(() => {
     localStorage.setItem('vantage_bookings', JSON.stringify(bookings))
@@ -32,13 +47,38 @@ export const CarProvider = ({ children }) => {
     localStorage.setItem('saved_cars', JSON.stringify(savedCars))
   }, [savedCars])
 
+  const addCar = (carData) => {
+    const newCar = {
+      ...carData,
+      id: carData.id || `custom-${Date.now()}`,
+      availability: true,
+      createdAt: new Date().toISOString()
+    }
+    setRentals(prev => {
+      const exists = prev.find(c => c.id === newCar.id)
+      if (exists) {
+        return prev.map(c => c.id === newCar.id ? newCar : c)
+      }
+      return [newCar, ...prev]
+    })
+    return newCar
+  }
+
+  const deleteCar = (carId) => {
+    setRentals(prev => prev.filter(c => c.id !== carId))
+  }
+
+  const updateCar = (carId, updatedData) => {
+    setRentals(prev => prev.map(c => c.id === carId ? { ...c, ...updatedData } : c))
+  }
+
   const checkAvailability = (carId, startDate, endDate) => {
     const newStart = new Date(startDate)
     const newEnd = new Date(endDate)
 
-    // Overlap logic: new_start < existing_end AND new_end > existing_start
     const hasOverlap = bookings.some(booking => {
       if (booking.carId !== carId) return false
+      if (booking.status === 'Cancelled') return false
 
       const existingStart = new Date(booking.startDate)
       const existingEnd = new Date(booking.endDate)
@@ -52,15 +92,24 @@ export const CarProvider = ({ children }) => {
   const addBooking = (bookingData) => {
     const newBooking = {
       ...bookingData,
-      id: Date.now().toString(),
-      bookingDate: new Date().toISOString()
+      id: `book-${Date.now()}`,
+      bookingDate: new Date().toISOString(),
+      status: 'Pending'
     }
-    setBookings(prev => [...prev, newBooking])
+    setBookings(prev => [newBooking, ...prev])
     return newBooking
   }
 
-  const cancelBooking = (bookingId) => {
+  const updateBookingStatus = (bookingId, status) => {
+    setBookings(prev => prev.map(b => b.id === bookingId ? { ...b, status } : b))
+  }
+
+  const deleteBooking = (bookingId) => {
     setBookings(prev => prev.filter(b => b.id !== bookingId))
+  }
+
+  const cancelBooking = (bookingId) => {
+    updateBookingStatus(bookingId, 'Cancelled')
   }
 
   const extendBooking = (bookingId, newEndDate, extraDays, extraPayment) => {
@@ -97,8 +146,8 @@ export const CarProvider = ({ children }) => {
     const matchesSearch = !searchQuery ||
       rental.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       rental.brand.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      rental.city.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      rental.type.toLowerCase().includes(searchQuery.toLowerCase())
+      (rental.city && rental.city.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (rental.type && rental.type.toLowerCase().includes(searchQuery.toLowerCase()))
 
     const matchesType = typeFilter === 'All' || rental.type === typeFilter
 
@@ -124,8 +173,17 @@ export const CarProvider = ({ children }) => {
 
   const value = {
     rentals,
+    addCar,
+    deleteCar,
+    updateCar,
     bookings,
+    addBooking,
+    updateBookingStatus,
+    deleteBooking,
+    cancelBooking,
+    extendBooking,
     savedCars,
+    setSavedCars,
     compareList,
     setCompareList,
     toggleCompare,
@@ -135,12 +193,9 @@ export const CarProvider = ({ children }) => {
     setTypeFilter,
     filteredRentals,
     checkAvailability,
-    addBooking,
-    cancelBooking,
-    extendBooking,
     toggleSaveCar,
     isCarSaved,
-    setSavedCars
+    loading: false
   }
 
   return <CarContext.Provider value={value}>{children}</CarContext.Provider>

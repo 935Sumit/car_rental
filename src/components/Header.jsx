@@ -24,6 +24,7 @@ const Header = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('currentUser')
+    localStorage.removeItem('adminLoggedIn')
     setCurrentUser(null)
     window.location.reload()
   }
@@ -34,7 +35,7 @@ const Header = () => {
     <header className={`header ${isScrolled ? 'scrolled' : ''}`}>
       <div className="header-container">
         <div className="header-content">
-          <Link to="/" className="logo">
+          <Link to={currentUser?.role === 'admin' ? "/admin/dashboard" : "/"} className="logo">
             <motion.div
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -46,42 +47,28 @@ const Header = () => {
           </Link>
 
           <nav className={`nav ${isMobileMenuOpen ? 'open' : ''}`}>
-            <Link
-              to="/"
-              className={`nav-link ${isActive('/') ? 'active' : ''}`}
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Home
-            </Link>
-            <Link
-              to="/saved"
-              className={`nav-link ${isActive('/saved') ? 'active' : ''}`}
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Saved Cars
-            </Link>
-            <Link
-              to="/contact"
-              className={`nav-link ${isActive('/contact') ? 'active' : ''}`}
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Contact
-            </Link>
-            {currentUser ? (
+            {currentUser?.role === 'admin' ? (
               <>
                 <Link
-                  to="/my-bookings"
-                  className={`nav-link ${isActive('/my-bookings') ? 'active' : ''}`}
+                  to="/admin/dashboard"
+                  className={`nav-link ${isActive('/admin/dashboard') ? 'active' : ''}`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  My Bookings
+                  Dashboard
                 </Link>
                 <Link
-                  to="/profile"
-                  className={`nav-link ${isActive('/profile') ? 'active' : ''}`}
+                  to="/admin/cars"
+                  className={`nav-link ${isActive('/admin/cars') ? 'active' : ''}`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  My Profile
+                  Cars
+                </Link>
+                <Link
+                  to="/admin/bookings"
+                  className={`nav-link ${isActive('/admin/bookings') ? 'active' : ''}`}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Bookings
                 </Link>
                 <button
                   onClick={handleLogout}
@@ -91,22 +78,70 @@ const Header = () => {
                 </button>
               </>
             ) : (
-              <div className="auth-links">
+              <>
                 <Link
-                  to="/login"
-                  className="btn btn-outline-small"
+                  to="/"
+                  className={`nav-link ${isActive('/') ? 'active' : ''}`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  Login
+                  Home
                 </Link>
                 <Link
-                  to="/signup"
-                  className="btn btn-primary-small"
+                  to="/saved"
+                  className={`nav-link ${isActive('/saved') ? 'active' : ''}`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  Sign Up
+                  Saved Cars
                 </Link>
-              </div>
+                <Link
+                  to="/contact"
+                  className={`nav-link ${isActive('/contact') ? 'active' : ''}`}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Contact
+                </Link>
+                {currentUser ? (
+                  <>
+                    <Link
+                      to="/my-bookings"
+                      className={`nav-link ${isActive('/my-bookings') ? 'active' : ''}`}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      My Bookings
+                    </Link>
+                    <Link
+                      to="/profile"
+                      className={`nav-link ${isActive('/profile') ? 'active' : ''}`}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      My Profile
+                    </Link>
+                    <button
+                      onClick={handleLogout}
+                      className="logout-btn"
+                    >
+                      Logout
+                    </button>
+                  </>
+                ) : (
+                  <div className="auth-links">
+                    <Link
+                      to="/login"
+                      className="btn btn-outline-small"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      Login
+                    </Link>
+                    <Link
+                      to="/signup"
+                      className="btn btn-primary-small"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      Sign Up
+                    </Link>
+                  </div>
+                )}
+              </>
             )}
           </nav>
 

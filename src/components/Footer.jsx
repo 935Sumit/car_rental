@@ -4,6 +4,9 @@ import { FaFacebookF, FaInstagram, FaTwitter } from 'react-icons/fa'
 import './Footer.css'
 
 const Footer = () => {
+  const currentUser = JSON.parse(localStorage.getItem('currentUser'))
+  const isAdmin = currentUser?.role === 'admin'
+
   return (
     <footer className="footer">
       <div className="container">
@@ -18,25 +21,29 @@ const Footer = () => {
             </div>
           </div>
 
-          <div className="footer-section">
-            <h4>Quick Links</h4>
-            <ul>
-              <li><Link to="/">Home</Link></li>
-              <li><Link to="/saved">Saved Cars</Link></li>
-              <li><Link to="/profile">My Profile</Link></li>
-              <li><Link to="/contact">Contact Us</Link></li>
-            </ul>
-          </div>
+          {!isAdmin && (
+            <div className="footer-section">
+              <h4>Quick Links</h4>
+              <ul>
+                <li><Link to="/">Home</Link></li>
+                <li><Link to="/saved">Saved Cars</Link></li>
+                <li><Link to="/profile">My Profile</Link></li>
+                <li><Link to="/contact">Contact Us</Link></li>
+              </ul>
+            </div>
+          )}
 
-          <div className="footer-section">
-            <h4>Rental Types</h4>
-            <ul>
-              <li><Link to="/">Hatchback</Link></li>
-              <li><Link to="/">Sedan</Link></li>
-              <li><Link to="/">SUV</Link></li>
-              <li><Link to="/">Luxury</Link></li>
-            </ul>
-          </div>
+          {!isAdmin && (
+            <div className="footer-section">
+              <h4>Rental Types</h4>
+              <ul>
+                <li><Link to="/">Hatchback</Link></li>
+                <li><Link to="/">Sedan</Link></li>
+                <li><Link to="/">SUV</Link></li>
+                <li><Link to="/">Luxury</Link></li>
+              </ul>
+            </div>
+          )}
 
           <div className="footer-section">
             <h4>Contact Info</h4>

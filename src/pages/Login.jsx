@@ -30,7 +30,7 @@ const Login = () => {
 
     if (!formData.email.trim()) {
       newErrors.email = 'Email is required'
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+    } else if (formData.email.trim() !== 'admin' && !/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = 'Email is invalid'
     }
 
@@ -53,6 +53,23 @@ const Login = () => {
 
     // Simulate API call and check localStorage
     setTimeout(() => {
+      // Hardcoded Admin Check
+      const isAdmin = (formData.email === 'admin' || formData.email === 'admin@vintagerides.com') && 
+                      formData.password === 'admin123';
+
+      if (isAdmin) {
+        localStorage.setItem('adminLoggedIn', 'true')
+        localStorage.setItem('currentUser', JSON.stringify({
+          fullName: 'System Administrator',
+          email: 'admin@vintagerides.com',
+          role: 'admin'
+        }))
+        setIsLoading(false)
+        navigate('/admin/dashboard')
+        window.location.reload()
+        return
+      }
+
       const users = JSON.parse(localStorage.getItem('users') || '[]')
       const user = users.find(u => u.email === formData.email && u.password === formData.password)
 
@@ -111,7 +128,7 @@ const Login = () => {
             <div className="form-group">
               <label htmlFor="email">Email Address</label>
               <input
-                type="email"
+                type="text"
                 id="email"
                 name="email"
                 value={formData.email}

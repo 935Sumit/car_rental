@@ -1,0 +1,251 @@
+.admin-dashboard {
+  min-height: calc(100vh - 150px);
+  background-color: var(--bg-cream);
+  padding: 140px 0 60px 0; /* Increased top padding to avoid header overlap */
+}
+
+.admin-content {
+  flex: 1;
+  padding: 0 40px;
+  max-width: 1400px; /* Wider layout for tables */
+  margin: 0 auto;
+  width: 100%;
+}
+
+.admin-header {
+  margin-bottom: 60px; /* More space below header */
+  position: relative;
+  border-bottom: 2px solid var(--secondary-color);
+  padding-bottom: 20px;
+}
+
+.admin-header::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100px;
+  height: 4px;
+  background: var(--primary-color);
+}
+
+.admin-header h1 {
+  font-size: 3rem;
+  color: var(--primary-color);
+  margin-bottom: 10px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.admin-header p {
+  font-size: 1.15rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+  opacity: 0.9;
+  line-height: 1.5;
+}
+
+.welcome-text {
+  font-family: 'Montserrat', sans-serif;
+  color: var(--text-secondary);
+}
+
+.admin-name {
+  color: var(--primary-color);
+  font-weight: 700;
+  border-bottom: 2px solid var(--secondary-color);
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 35px;
+  margin-top: 20px;
+}
+
+.stat-card {
+  background: var(--bg-white);
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: transform 0.3s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-lg);
+}
+
+.stat-label {
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--primary-light);
+}
+
+.stat-value {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: var(--primary-color);
+  font-family: 'Cormorant Garamond', serif;
+}
+
+/* Dashboard Sections Grid */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 35px;
+  margin-top: 50px;
+}
+
+.dashboard-card {
+  background: var(--bg-white);
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border-color);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  border-bottom: 1px solid var(--bg-cream);
+  padding-bottom: 15px;
+}
+
+.card-header h2 {
+  font-size: 1.6rem;
+  margin: 0;
+}
+
+.view-all {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--secondary-color);
+  letter-spacing: 1px;
+}
+
+/* Activity List */
+.activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.activity-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  background: var(--bg-cream);
+  border-radius: 8px;
+  transition: transform 0.2s ease;
+}
+
+.activity-item:hover {
+  transform: translateX(5px);
+}
+
+.customer-name {
+  display: block;
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+.activity-detail {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.activity-meta {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.status-dot.approved { background: var(--success); }
+.status-dot.pending { background: var(--secondary-color); }
+.status-dot.cancelled { background: var(--error); }
+
+.booking-price {
+  font-weight: 800;
+  font-size: 14px;
+}
+
+/* Performance List */
+.performance-list {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.performance-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.car-rank {
+  font-weight: 800;
+  color: var(--secondary-color);
+  font-size: 1.2rem;
+  min-width: 30px;
+}
+
+.car-perf-info {
+  flex: 1;
+}
+
+.perf-name {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.perf-bar-bg {
+  height: 6px;
+  background: var(--bg-cream);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.perf-bar-fill {
+  height: 100%;
+  background: var(--primary-color);
+  border-radius: 10px;
+}
+
+.perf-count {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-light);
+  white-space: nowrap;
+}
+
+.no-data {
+  text-align: center;
+  color: var(--text-light);
+  padding: 40px 0;
+  font-style: italic;
+}
+
+@media (max-width: 1100px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}

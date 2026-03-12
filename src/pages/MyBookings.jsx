@@ -14,7 +14,7 @@ const MyBookings = () => {
     const [cancelMessage, setCancelMessage] = useState('')
     const [extendingBooking, setExtendingBooking] = useState(null)
 
-    const userBookings = bookings.filter(b => b.userEmail === currentUser?.email)
+    const userBookings = bookings.filter(b => b.userEmail === currentUser?.email && b.status !== 'Cancelled')
 
     const handleCancel = (bookingId) => {
         if (window.confirm('Are you sure you want to cancel this booking?')) {

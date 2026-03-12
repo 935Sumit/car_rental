@@ -10,6 +10,9 @@ import SavedCars from './pages/SavedCars'
 import MyBookings from './pages/MyBookings'
 import MyProfile from './pages/MyProfile'
 import CarDetails from './pages/CarDetails'
+import Dashboard from './admin/Dashboard'
+import ManageCars from './admin/ManageCars'
+import ManageBookings from './admin/ManageBookings'
 import './App.css'
 
 function App() {
@@ -41,6 +44,9 @@ function App() {
                 </PrivateRoute>
               } />
               <Route path="/car/:id" element={<CarDetails />} />
+              <Route path="/admin/dashboard" element={<Dashboard />} />
+              <Route path="/admin/cars" element={<ManageCars />} />
+              <Route path="/admin/bookings" element={<ManageBookings />} />
               {/* Redirect old routes */}
               <Route path="/rent" element={<Navigate to="/" />} />
             </Routes>
