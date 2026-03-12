@@ -53,9 +53,12 @@ const Login = () => {
 
     // Simulate API call and check localStorage
     setTimeout(() => {
+      const inputEmail = formData.email.trim().toLowerCase();
+      const inputPassword = formData.password;
+
       // Hardcoded Admin Check
-      const isAdmin = (formData.email === 'admin' || formData.email === 'admin@vintagerides.com') && 
-                      formData.password === 'admin123';
+      const isAdmin = (inputEmail === 'admin' || inputEmail === 'admin@vintagerides.com') && 
+                      inputPassword === 'admin123';
 
       if (isAdmin) {
         localStorage.setItem('adminLoggedIn', 'true')
@@ -70,8 +73,14 @@ const Login = () => {
         return
       }
 
-      const users = JSON.parse(localStorage.getItem('vantage_users') || '[]')
-      const user = users.find(u => u.email === formData.email && u.password === formData.password)
+      let users = [];
+      try {
+          users = JSON.parse(localStorage.getItem('vantage_users') || '[]');
+      } catch (e) {
+          console.error("Storage corruption detected", e);
+      }
+      
+      const user = users.find(u => u.email.toLowerCase() === inputEmail && u.password === inputPassword)
       
       if (user) {
         if (user.status === 'blocked') {

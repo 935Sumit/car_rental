@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import logo from '../assets/Logo.png'
+import logo from '../assets/final logo.jpg.png'
 import './Header.css'
 
 const Header = () => {
@@ -138,22 +138,22 @@ const Header = () => {
                     </button>
                   </>
                 ) : (
-                  <div className="auth-links">
+                  <>
                     <Link
                       to="/login"
-                      className="btn btn-outline-small"
+                      className={`nav-link ${isActive('/login') ? 'active' : ''}`}
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
                       Login
                     </Link>
                     <Link
                       to="/signup"
-                      className="btn btn-primary-small"
+                      className={`nav-link ${isActive('/signup') ? 'active' : ''}`}
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
                       Sign Up
                     </Link>
-                  </div>
+                  </>
                 )}
               </>
             )}

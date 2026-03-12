@@ -89,7 +89,7 @@ const Signup = () => {
 
       const newUser = {
         fullName: formData.fullName,
-        email: formData.email,
+        email: formData.email.trim().toLowerCase(),
         phone: formData.phone,
         password: formData.password,
         status: 'active',

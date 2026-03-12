@@ -14,16 +14,27 @@ export const useCarContext = () => {
 export const CarProvider = ({ children }) => {
   // Initialize rentals from localStorage or mock data
   const [rentals, setRentals] = useState(() => {
-    const savedCars = localStorage.getItem('vantage_cars')
-    if (savedCars) {
-      return JSON.parse(savedCars)
+    try {
+        const savedCars = localStorage.getItem('vantage_cars')
+        if (savedCars) {
+          const parsed = JSON.parse(savedCars);
+          return Array.isArray(parsed) && parsed.length > 0 ? parsed : mockRentals;
+        }
+        return mockRentals
+    } catch (e) {
+        console.error("Error loading cars:", e);
+        return mockRentals;
     }
-    return mockRentals
   })
 
   const [bookings, setBookings] = useState(() => {
-    const savedBookings = localStorage.getItem('vantage_bookings')
-    return savedBookings ? JSON.parse(savedBookings) : []
+    try {
+        const savedBookings = localStorage.getItem('vantage_bookings')
+        return savedBookings ? JSON.parse(savedBookings) : []
+    } catch (e) {
+        console.error("Error loading bookings:", e);
+        return [];
+    }
   })
 
   const [savedCars, setSavedCars] = useState(() => {

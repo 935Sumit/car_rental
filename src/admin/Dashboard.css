@@ -37,6 +37,39 @@
   letter-spacing: -0.5px;
 }
 
+.hero-btn-calendar {
+    background: var(--primary-color) !important;
+    color: #ffffff !important;
+    border: 1px solid var(--primary-color) !important;
+    display: inline-flex !important;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 28px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-radius: 8px !important;
+    box-shadow: var(--shadow-sm);
+}
+
+.hero-btn-calendar svg {
+    font-size: 1.2rem;
+    color: #ffffff !important;
+}
+
+.hero-btn-calendar:hover {
+    background: var(--primary-light) !important;
+    color: #ffffff !important;
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
+}
+
+.hero-btn-calendar:active {
+    background: var(--primary-dark) !important;
+    color: #ffffff !important;
+    transform: translateY(-1px);
+}
+
 .admin-header p {
   font-size: 1.15rem;
   color: var(--text-secondary);
@@ -76,8 +109,17 @@
 }
 
 .stat-card:hover {
-  transform: translateY(-5px);
+  transform: translateY(-8px);
   box-shadow: var(--shadow-lg);
+  border-color: var(--secondary-color);
+  background: #ffffff !important;
+}
+
+.stat-card:active {
+  transform: translateY(-2px);
+  background: #ffffff !important; /* Keep it light on click */
+  border-color: var(--primary-color);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
 }
 
 .stat-label {

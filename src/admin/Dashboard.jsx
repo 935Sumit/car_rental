@@ -61,7 +61,7 @@ const Dashboard = () => {
                                 <h1>Admin Dashboard</h1>
                                 <p className="welcome-text">Greetings, <span className="admin-name">Administrator</span>. Here's your fleet's status at a glance.</p>
                             </div>
-                            <Link to="/admin/calendar" className="btn btn-outline" style={{ background: 'var(--bg-white)' }}>
+                            <Link to="/admin/calendar" className="btn hero-btn-calendar">
                                 <HiCalendar style={{ marginRight: '8px' }} /> View Schedule
                             </Link>
                         </div>
