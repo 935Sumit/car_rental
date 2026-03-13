@@ -80,20 +80,9 @@ const BookingModal = ({ rental, onClose }) => {
     audio.play().catch(e => console.log('Audio play blocked'))
   }
 
-  const finalizeBooking = (payDetails = null) => {
+  const finalizeBooking = async (payDetails = null) => {
     const generatedId = 'BR' + Math.random().toString(36).substring(2, 9).toUpperCase()
     setBookingId(generatedId)
-
-    // Save license to profile if it was entered new
-    const licenseToUse = useSavedLicense ? currentUser.licenseNumber : licenseInput.trim()
-    if (!useSavedLicense) {
-      const updatedUser = { ...currentUser, licenseNumber: licenseToUse }
-      localStorage.setItem('currentUser', JSON.stringify(updatedUser))
-
-      const users = JSON.parse(localStorage.getItem('vantage_users') || '[]')
-      const updatedUsers = users.map(u => u.email === updatedUser.email ? updatedUser : u)
-      localStorage.setItem('vantage_users', JSON.stringify(updatedUsers))
-    }
 
     // Prepare final booking data
     const finalBookingData = {
@@ -126,9 +115,14 @@ const BookingModal = ({ rental, onClose }) => {
       } : { paymentStatus: 'Pending (COD)' })
     }
 
-    addBooking(finalBookingData)
-    playSuccessSound()
-    setSubmitted(true)
+    try {
+      await addBooking(finalBookingData)
+      playSuccessSound()
+      setSubmitted(true)
+    } catch (e) {
+      console.error("Booking error:", e)
+      setError("Failed to create booking. Please try again.")
+    }
 
     // Auto-close and redirect after 10 seconds (giving more time for download)
     redirectTimerRef.current = setTimeout(() => {
@@ -250,6 +244,11 @@ const BookingModal = ({ rental, onClose }) => {
     e.preventDefault()
 
     if (!validateForm()) return
+
+    if (!formData.paymentMethod) {
+      setError('Please select a payment method.')
+      return
+    }
 
     if (formData.paymentMethod !== 'Cash on Delivery' && !isPaid) {
       setError('Please complete the payment before confirming.')
@@ -539,7 +538,6 @@ const BookingModal = ({ rental, onClose }) => {
                     <button
                       type="submit"
                       className="btn btn-primary"
-                      disabled={duration <= 0 || (!useSavedLicense && !licenseInput.trim()) || (formData.paymentMethod !== 'Cash on Delivery' && !isPaid)}
                     >
                       Confirm and Book
                     </button>
