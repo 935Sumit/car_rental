@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useCarContext } from '../context/CarContext'
+import { supabase } from '../supabase/supabaseClient'
 import './Dashboard.css'
 import './ManageCars.css'
 
@@ -45,13 +46,30 @@ const ManageCars = () => {
         }
     }
 
-    const fileToBase64 = (file) => {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader()
-            reader.readAsDataURL(file)
-            reader.onload = () => resolve(reader.result)
-            reader.onerror = (error) => reject(error)
-        })
+    const uploadImage = async (file) => {
+        try {
+            const fileName = `${Date.now()}_${file.name.replace(/\s+/g, '_')}`
+            const { data, error } = await supabase.storage
+                .from('car-images')
+                .upload(fileName, file, {
+                    cacheControl: '3600',
+                    upsert: false
+                })
+            
+            if (error) {
+                console.error("Supabase Storage Error:", error)
+                throw new Error(error.message || "Failed to upload image")
+            }
+
+            const { data: publicUrlData } = supabase.storage
+                .from('car-images')
+                .getPublicUrl(fileName)
+            
+            return publicUrlData.publicUrl
+        } catch (err) {
+            console.error("Upload process failed:", err)
+            throw err
+        }
     }
 
     const handleSubmit = async (e) => {
@@ -61,24 +79,24 @@ const ManageCars = () => {
             let finalImageUrl = isEditing ? rentals.find(c => c.id === currentCarId)?.image : ''
 
             if (imageFile) {
-                // Convert to Base64 for local storage
-                finalImageUrl = await fileToBase64(imageFile)
+                finalImageUrl = await uploadImage(imageFile)
             }
 
+            const { location, ...restFormData } = formData;
             const carData = {
-                ...formData,
+                ...restFormData,
                 image: finalImageUrl,
                 pricePerDay: Number(formData.pricePerDay),
                 seats: Number(formData.seats),
-                city: formData.location,
+                city: location,
                 status: formData.status || 'available',
                 availability: formData.status === 'available'
             }
 
             if (isEditing) {
-                updateCar(currentCarId, carData)
+                await updateCar(currentCarId, carData)
             } else {
-                addCar(carData)
+                await addCar(carData)
             }
             setShowModal(false)
             resetForm()
@@ -111,9 +129,9 @@ const ManageCars = () => {
         setShowModal(true)
     }
 
-    const handleDelete = (id) => {
+    const handleDelete = async (id) => {
         if (window.confirm('Are you sure you want to delete this car?')) {
-            deleteCar(id)
+            await deleteCar(id)
         }
     }
 
@@ -169,7 +187,7 @@ const ManageCars = () => {
                             </thead>
                             <tbody>
                                 {rentals.length === 0 ? (
-                                    <tr><td colSpan="7" style={{ textAlign: 'center' }}>No cars found.</td></tr>
+                                    <tr><td colSpan="8" style={{ textAlign: 'center' }}>No cars found.</td></tr>
                                 ) : (
                                     rentals.map(car => (
                                         <tr key={car.id}>

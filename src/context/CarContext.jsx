@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react'
-import { mockRentals } from '../data/mockData'
+import { supabase } from '../supabase/supabaseClient'
+
 
 const CarContext = createContext()
 
@@ -12,75 +13,137 @@ export const useCarContext = () => {
 }
 
 export const CarProvider = ({ children }) => {
-  // Initialize rentals from localStorage or mock data
-  const [rentals, setRentals] = useState(() => {
-    try {
-        const savedCars = localStorage.getItem('vantage_cars')
-        if (savedCars) {
-          const parsed = JSON.parse(savedCars);
-          return Array.isArray(parsed) && parsed.length > 0 ? parsed : mockRentals;
-        }
-        return mockRentals
-    } catch (e) {
-        console.error("Error loading cars:", e);
-        return mockRentals;
-    }
-  })
-
-  const [bookings, setBookings] = useState(() => {
-    try {
-        const savedBookings = localStorage.getItem('vantage_bookings')
-        return savedBookings ? JSON.parse(savedBookings) : []
-    } catch (e) {
-        console.error("Error loading bookings:", e);
-        return [];
-    }
-  })
-
-  const [savedCars, setSavedCars] = useState(() => {
-    const saved = localStorage.getItem('saved_cars')
-    return saved ? JSON.parse(saved) : []
-  })
-
+  const [rentals, setRentals] = useState([])
+  const [bookings, setBookings] = useState([])
+  const [savedCars, setSavedCars] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [typeFilter, setTypeFilter] = useState('All')
 
-  // Persist data to localStorage
+  // Real-time rentals from Supabase
   useEffect(() => {
-    localStorage.setItem('vantage_cars', JSON.stringify(rentals))
-  }, [rentals])
+    const fetchRentals = async () => {
+      setLoading(true)
+      const { data, error } = await supabase
+        .from('rentals')
+        .select('*')
+      
+      if (error) {
+        console.error("Supabase rentals error:", error)
+        setError("Error fetching rentals from Supabase")
+      } else {
+        setRentals(data || [])
+      }
+      setLoading(false)
+    }
 
+    fetchRentals()
+
+    // Subscribe to changes
+    const rentalsSubscription = supabase
+      .channel('rentals-changes')
+      .on('postgres_changes', { event: '*', table: 'rentals' }, (payload) => {
+        fetchRentals()
+      })
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(rentalsSubscription)
+    }
+  }, [])
+
+  // Real-time bookings from Supabase
   useEffect(() => {
-    localStorage.setItem('vantage_bookings', JSON.stringify(bookings))
-  }, [bookings])
+    const fetchBookings = async () => {
+      const { data, error } = await supabase
+        .from('bookings')
+        .select('*')
+      
+      if (error) {
+        console.error("Supabase bookings error:", error)
+      } else {
+        setBookings(data)
+      }
+    }
+
+    fetchBookings()
+
+    const bookingsSubscription = supabase
+      .channel('bookings-changes')
+      .on('postgres_changes', { event: '*', table: 'bookings' }, (payload) => {
+        fetchBookings()
+      })
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(bookingsSubscription)
+    }
+  }, [])
+
+  // Persist saved cars in localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem('saved_cars')
+    if (saved) setSavedCars(JSON.parse(saved))
+  }, [])
 
   useEffect(() => {
     localStorage.setItem('saved_cars', JSON.stringify(savedCars))
   }, [savedCars])
 
-  const addCar = (carData) => {
-    const newCar = {
-      ...carData,
-      id: carData.id || `custom-${Date.now()}`,
-      availability: true,
-      createdAt: new Date().toISOString()
-    }
-    setRentals(prev => {
-      const exists = prev.find(c => c.id === newCar.id)
-      if (exists) {
-        return prev.map(c => c.id === newCar.id ? newCar : c)
+  const seedMockData = async () => {
+    // Seeding disabled to prevent duplicates.
+    // Use the Admin Dashboard to add new cars manually.
+    console.log("Automatic seeding is disabled. Use Admin Dashboard to manage cars.");
+  }
+
+  const addCar = async (carData) => {
+    try {
+      const newCar = {
+        ...carData,
+        availability: true,
+        status: 'available',
+        created_at: new Date().toISOString()
       }
-      return [newCar, ...prev]
-    })
-    return newCar
+      const { data, error } = await supabase
+        .from('rentals')
+        .insert([newCar])
+        .select()
+
+      if (error) throw error
+      return data[0]
+    } catch (e) {
+      console.error("Error adding car:", e)
+      throw e
+    }
   }
 
-  const deleteCar = (carId) => {
-    setRentals(prev => prev.filter(c => c.id !== carId))
+  const deleteCar = async (carId) => {
+    try {
+      const { error } = await supabase
+        .from('rentals')
+        .delete()
+        .eq('id', carId)
+      
+      if (error) throw error
+    } catch (e) {
+      console.error("Error deleting car:", e)
+      throw e
+    }
   }
 
-  const updateCar = (carId, updatedData) => {
-    setRentals(prev => prev.map(c => c.id === carId ? { ...c, ...updatedData } : c))
+  const updateCar = async (carId, updatedData) => {
+    try {
+      const { error } = await supabase
+        .from('rentals')
+        .update(updatedData)
+        .eq('id', carId)
+      
+      if (error) throw error
+    } catch (e) {
+      console.error("Error updating car:", e)
+      throw e
+    }
   }
 
   const checkAvailability = (carId, startDate, endDate) => {
@@ -100,42 +163,73 @@ export const CarProvider = ({ children }) => {
     return !hasOverlap
   }
 
-  const addBooking = (bookingData) => {
-    const newBooking = {
-      ...bookingData,
-      id: `book-${Date.now()}`,
-      bookingDate: new Date().toISOString(),
-      status: 'Pending'
+  const addBooking = async (bookingData) => {
+    try {
+      const newBooking = {
+        ...bookingData,
+        booking_date: new Date().toISOString(),
+        status: 'Active'
+      }
+      const { data, error } = await supabase
+        .from('bookings')
+        .insert([newBooking])
+        .select()
+
+      if (error) throw error
+      return data[0]
+    } catch (e) {
+      console.error("Error adding booking:", e)
+      throw e
     }
-    setBookings(prev => [newBooking, ...prev])
-    return newBooking
   }
 
-  const updateBookingStatus = (bookingId, status) => {
-    setBookings(prev => prev.map(b => b.id === bookingId ? { ...b, status } : b))
+  const updateBookingStatus = async (bookingId, status) => {
+    try {
+      const { error } = await supabase
+        .from('bookings')
+        .update({ status })
+        .eq('id', bookingId)
+      
+      if (error) throw error
+    } catch (e) {
+      console.error("Error updating booking status:", e)
+      throw e
+    }
   }
 
-  const deleteBooking = (bookingId) => {
-    setBookings(prev => prev.filter(b => b.id !== bookingId))
+  const deleteBooking = async (bookingId) => {
+    try {
+      const { error } = await supabase
+        .from('bookings')
+        .delete()
+        .eq('id', bookingId)
+      
+      if (error) throw error
+    } catch (e) {
+      console.error("Error deleting booking:", e)
+      throw e
+    }
   }
 
   const cancelBooking = (bookingId) => {
     updateBookingStatus(bookingId, 'Cancelled')
   }
 
-  const extendBooking = (bookingId, newEndDate, extraDays, extraPayment) => {
-    setBookings(prev => prev.map(b => {
-      if (b.id === bookingId) {
-        return {
-          ...b,
+  const extendBooking = async (bookingId, newEndDate, extraDays, extraPayment) => {
+    try {
+      const { error } = await supabase
+        .from('bookings')
+        .update({
           endDate: newEndDate,
-          extraDays: (b.extraDays || 0) + extraDays,
-          remainingPayment: (b.remainingPayment || 0) + extraPayment,
           status: 'Extended'
-        }
-      }
-      return b
-    }))
+        })
+        .eq('id', bookingId)
+      
+      if (error) throw error
+    } catch (e) {
+      console.error("Error extending booking:", e)
+      throw e
+    }
   }
 
   const toggleSaveCar = (car) => {
@@ -153,7 +247,7 @@ export const CarProvider = ({ children }) => {
     return savedCars.some(c => c.id === carId)
   }
 
-  const filteredRentals = rentals.filter(rental => {
+  const filteredRentalsList = rentals.filter(rental => {
     const matchesSearch = !searchQuery ||
       rental.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       rental.brand.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -202,11 +296,12 @@ export const CarProvider = ({ children }) => {
     setSearchQuery,
     typeFilter,
     setTypeFilter,
-    filteredRentals,
+    filteredRentals: filteredRentalsList,
     checkAvailability,
     toggleSaveCar,
     isCarSaved,
-    loading: false
+    loading,
+    error
   }
 
   return <CarContext.Provider value={value}>{children}</CarContext.Provider>

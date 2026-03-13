@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useCarContext } from '../context/CarContext'
+import { supabase } from '../supabase/supabaseClient'
 import { HiCheckCircle, HiUser, HiMail, HiPhone, HiBadgeCheck } from 'react-icons/hi'
 import './MyProfile.css'
 
@@ -9,6 +10,7 @@ const MyProfile = () => {
     const [user, setUser] = useState(null)
     const [isEditingLicense, setIsEditingLicense] = useState(false)
     const [licenseInput, setLicenseInput] = useState('')
+    const [isUpdating, setIsUpdating] = useState(false)
 
     useEffect(() => {
         const currentUser = JSON.parse(localStorage.getItem('currentUser'))
@@ -18,7 +20,7 @@ const MyProfile = () => {
         }
     }, [])
 
-    const handleSaveLicense = () => {
+    const handleSaveLicense = async () => {
         const licenseRegex = /^GJ-[0-9]{2}-[0-9]{4}-[0-9]{7}$/
 
         if (!licenseInput.trim()) {
@@ -31,28 +33,49 @@ const MyProfile = () => {
             return
         }
 
-        const updatedUser = { ...user, licenseNumber: licenseInput.trim() }
-        setUser(updatedUser)
-        localStorage.setItem('currentUser', JSON.stringify(updatedUser))
+        setIsUpdating(true)
+        try {
+            const updatedLicense = licenseInput.trim()
+            const { error } = await supabase
+                .from('users')
+                .update({ licenseNumber: updatedLicense })
+                .eq('id', user.id)
+            
+            if (error) throw error
 
-        // Also update in users list to persist across logins
-        const users = JSON.parse(localStorage.getItem('vantage_users') || '[]')
-        const updatedUsers = users.map(u => u.email === updatedUser.email ? updatedUser : u)
-        localStorage.setItem('vantage_users', JSON.stringify(updatedUsers))
-
-        setIsEditingLicense(false)
+            const updatedUser = { ...user, licenseNumber: updatedLicense }
+            setUser(updatedUser)
+            localStorage.setItem('currentUser', JSON.stringify(updatedUser))
+            setIsEditingLicense(false)
+        } catch (error) {
+            console.error('Error saving license:', error)
+            alert('Failed to save license to Supabase')
+        } finally {
+            setIsUpdating(false)
+        }
     }
 
-    const handleRemoveLicense = () => {
+    const handleRemoveLicense = async () => {
         if (window.confirm('Are you sure you want to remove your driving license? You will not be able to book any cars until you add it back.')) {
-            const updatedUser = { ...user, licenseNumber: '' }
-            setUser(updatedUser)
-            setLicenseInput('')
-            localStorage.setItem('currentUser', JSON.stringify(updatedUser))
+            setIsUpdating(true)
+            try {
+                const { error } = await supabase
+                    .from('users')
+                    .update({ licenseNumber: null })
+                    .eq('id', user.id)
+                
+                if (error) throw error
 
-            const users = JSON.parse(localStorage.getItem('vantage_users') || '[]')
-            const updatedUsers = users.map(u => u.email === updatedUser.email ? updatedUser : u)
-            localStorage.setItem('vantage_users', JSON.stringify(updatedUsers))
+                const updatedUser = { ...user, licenseNumber: '' }
+                setUser(updatedUser)
+                setLicenseInput('')
+                localStorage.setItem('currentUser', JSON.stringify(updatedUser))
+            } catch (error) {
+                console.error('Error removing license:', error)
+                alert('Failed to remove license from Supabase')
+            } finally {
+                setIsUpdating(false)
+            }
         }
     }
 
@@ -112,7 +135,7 @@ const MyProfile = () => {
                             {!isEditingLicense && user.licenseNumber && (
                                 <div style={{ display: 'flex', gap: '8px' }}>
                                     <button className="btn-edit-small" onClick={() => setIsEditingLicense(true)}>Edit License</button>
-                                    <button className="btn-remove-small" onClick={handleRemoveLicense}>Remove Licence</button>
+                                    <button className="btn-remove-small" onClick={handleRemoveLicense} disabled={isUpdating}>Remove Licence</button>
                                 </div>
                             )}
                         </div>
@@ -131,7 +154,9 @@ const MyProfile = () => {
                                     />
                                 </div>
                                 <div className="form-actions-row">
-                                    <button className="btn btn-primary btn-small" onClick={handleSaveLicense}>Save License</button>
+                                    <button className="btn btn-primary btn-small" onClick={handleSaveLicense} disabled={isUpdating}>
+                                        {isUpdating ? 'Saving...' : 'Save License'}
+                                    </button>
                                     <button className="btn btn-outline btn-small" onClick={() => setIsEditingLicense(false)}>Cancel</button>
                                 </div>
                             </div>

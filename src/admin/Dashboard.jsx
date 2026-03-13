@@ -1,44 +1,48 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useCarContext } from '../context/CarContext'
+import { supabase } from '../supabase/supabaseClient'
 import { HiCalendar } from 'react-icons/hi'
 import './Dashboard.css'
 
 const Dashboard = () => {
     const navigate = useNavigate()
     const { rentals, bookings } = useCarContext()
+    const [userCount, setUserCount] = useState(0)
 
     useEffect(() => {
-        // Route Protection
         const isAdmin = localStorage.getItem('adminLoggedIn')
         if (isAdmin !== 'true') {
             navigate('/login')
         }
+
+        const fetchUserCount = async () => {
+            const { count, error } = await supabase
+                .from('users')
+                .select('*', { count: 'exact', head: true })
+            
+            if (!error) setUserCount(count)
+        }
+        fetchUserCount()
     }, [navigate])
 
-    // Real Data Calculations
     const activeBookings = (bookings || []).filter(b => b.status !== 'Cancelled')
     const totalCars = (rentals || []).length
     const totalBookings = activeBookings.length
-    const availableCars = (rentals || []).filter(car => car.availability).length
     const totalRevenue = activeBookings.reduce((sum, b) => sum + (Number(b.totalPrice) || 0), 0)
-
-    const totalUsers = JSON.parse(localStorage.getItem('vantage_users') || localStorage.getItem('users') || '[]').length
 
     const stats = [
         { label: 'Total Cars', value: totalCars.toString() },
         { label: 'Total Bookings', value: totalBookings.toString() },
-        { label: 'Total Users', value: totalUsers.toString() },
+        { label: 'Total Users', value: userCount.toString() },
         { label: 'Total Revenue', value: `₹${totalRevenue.toLocaleString()}` }
     ]
 
-    // Get recent 5 bookings
     const recentBookings = [...(bookings || [])]
-        .filter(b => b.bookingDate) // Ensure date exists
-        .sort((a, b) => new Date(b.bookingDate) - new Date(a.bookingDate))
+        .sort((a, b) => new Date(b.booking_date || b.bookingDate) - new Date(a.booking_date || a.bookingDate))
+        .reverse()
         .slice(0, 3)
 
-    // Calculate top performing cars (by booking count)
     const carBookingCounts = activeBookings.reduce((acc, b) => {
         if (b.carName) {
             acc[b.carName] = (acc[b.carName] || 0) + 1
@@ -78,7 +82,6 @@ const Dashboard = () => {
                 </div>
 
                 <div className="dashboard-grid fade-in-up" style={{ animationDelay: '0.4s' }}>
-                    {/* Recent Activity */}
                     <div className="dashboard-card recent-bookings">
                         <div className="card-header">
                             <h2>Recent Bookings</h2>
@@ -104,7 +107,6 @@ const Dashboard = () => {
                         </div>
                     </div>
 
-                    {/* Top Cars */}
                     <div className="dashboard-card top-cars">
                         <div className="card-header">
                             <h2>Top Performing Fleet</h2>

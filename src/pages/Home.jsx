@@ -12,7 +12,20 @@ import './Home.css'
 
 const Home = () => {
   const navigate = useNavigate()
-  const { filteredRentals, searchQuery, setSearchQuery, typeFilter, setTypeFilter, rentals, toggleSaveCar, isCarSaved, compareList, toggleCompare } = useCarContext()
+  const { 
+    filteredRentals, 
+    searchQuery, 
+    setSearchQuery, 
+    typeFilter, 
+    setTypeFilter, 
+    rentals, 
+    toggleSaveCar, 
+    isCarSaved, 
+    compareList, 
+    toggleCompare,
+    loading,
+    error: contextError
+  } = useCarContext()
   const [selectedRental, setSelectedRental] = useState(null)
   const [showBookingModal, setShowBookingModal] = useState(false)
   const [showCompareModal, setShowCompareModal] = useState(false)
@@ -107,96 +120,107 @@ const Home = () => {
       {/* Car Grid */}
       <section className="car-listing" id="rentals">
         <div className="container">
-          <motion.div
-            className="rental-cards-grid"
-            variants={staggerContainer}
-            initial="hidden"
-            animate="visible"
-          >
-            {filteredRentals.map(car => (
-              <motion.div
-                key={car.id}
-                variants={cardVariants}
-                className="rental-card-home"
-                onClick={() => handleViewDetails(car.id)}
-                style={{ cursor: 'pointer' }}
-              >
-                <div className="rc-image-wrapper">
-                  <img src={car.image} alt={car.name} className="rc-image" />
-                  <div className={`rc-availability ${car.status === 'available' || (!car.status && car.availability) ? 'available' : 'unavailable'}`}>
-                    {car.status === 'maintenance' ? 'Under Maintenance' : (car.status === 'booked' || (!car.status && !car.availability)) ? 'Not Available' : 'Available'}
-                  </div>
-                  <div className="rc-type-badge">{car.type}</div>
-                </div>
-
-                <div className="rc-body">
-                  <div className="rc-header">
-                    <h3 className="rc-name">{car.name}</h3>
-                    <div className="rc-specs">
-                      {car.fuel && <span>{car.fuel}</span>}
-                      {car.fuel && (car.transmission || car.seats) && <span className="separator">•</span>}
-                      {car.transmission && <span>{car.transmission}</span>}
-                      {car.transmission && car.seats && <span className="separator">•</span>}
-                      {car.seats && <span>{car.seats} Seater</span>}
-                    </div>
-                    <span className="rc-brand">{car.brand}</span>
-                  </div>
-
-                  <div className="rc-info">
-                    <div className="rc-location">
-                      <HiLocationMarker />
-                      {car.city}
-                    </div>
-                  </div>
-
-                  <div className="rc-price-section">
-                    <span className="rc-price">₹{car.pricePerDay}</span>
-                    <span className="rc-label">/ day</span>
-                  </div>
-
-                  <div className="rc-actions">
-                    {JSON.parse(localStorage.getItem('currentUser')) && (
-                      <button
-                        className={`btn-save-bookmark ${isCarSaved(car.id) ? 'saved' : ''}`}
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          toggleSaveCar(car)
-                        }}
-                        title={isCarSaved(car.id) ? 'Remove from Saved' : 'Save for Later'}
-                      >
-                        <HiBookmark />
-                      </button>
-                    )}
-                    <button
-                      className={`btn-compare-card ${compareList.some(c => c.id === car.id) ? 'active' : ''}`}
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        toggleCompare(car)
-                      }}
-                      title="Compare this car"
-                    >
-                      <MdCompareArrows />
-                    </button>
-                    <button
-                      className="btn-book"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        handleViewDetails(car.id)
-                      }}
-                    >
-                      View Details
-                    </button>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </motion.div>
-
-          {filteredRentals.length === 0 && (
-            <div className="no-results">
-              <h3>No cars found matching your search.</h3>
-              <p>Try searching for a different brand or type.</p>
+          {contextError && <div className="error-banner">{contextError}</div>}
+          
+          {loading ? (
+            <div className="loading-state">
+              <div className="loader"></div>
+              <p>Fetching your fleet...</p>
             </div>
+          ) : (
+            <>
+              <motion.div
+                className="rental-cards-grid"
+                variants={staggerContainer}
+                initial="hidden"
+                animate="visible"
+              >
+                {filteredRentals.map(car => (
+                  <motion.div
+                    key={car.id}
+                    variants={cardVariants}
+                    className="rental-card-home"
+                    onClick={() => handleViewDetails(car.id)}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <div className="rc-image-wrapper">
+                      <img src={car.image} alt={car.name} className="rc-image" />
+                      <div className={`rc-availability ${car.status === 'available' || (!car.status && car.availability) ? 'available' : 'unavailable'}`}>
+                        {car.status === 'maintenance' ? 'Under Maintenance' : (car.status === 'booked' || (!car.status && !car.availability)) ? 'Not Available' : 'Available'}
+                      </div>
+                      <div className="rc-type-badge">{car.type}</div>
+                    </div>
+
+                    <div className="rc-body">
+                      <div className="rc-header">
+                        <h3 className="rc-name">{car.name}</h3>
+                        <div className="rc-specs">
+                          {car.fuel && <span>{car.fuel}</span>}
+                          {car.fuel && (car.transmission || car.seats) && <span className="separator">•</span>}
+                          {car.transmission && <span>{car.transmission}</span>}
+                          {car.transmission && car.seats && <span className="separator">•</span>}
+                          {car.seats && <span>{car.seats} Seater</span>}
+                        </div>
+                        <span className="rc-brand">{car.brand}</span>
+                      </div>
+
+                      <div className="rc-info">
+                        <div className="rc-location">
+                          <HiLocationMarker />
+                          {car.city}
+                        </div>
+                      </div>
+
+                      <div className="rc-price-section">
+                        <span className="rc-price">₹{car.pricePerDay}</span>
+                        <span className="rc-label">/ day</span>
+                      </div>
+
+                      <div className="rc-actions">
+                        {JSON.parse(localStorage.getItem('currentUser')) && (
+                          <button
+                            className={`btn-save-bookmark ${isCarSaved(car.id) ? 'saved' : ''}`}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              toggleSaveCar(car)
+                            }}
+                            title={isCarSaved(car.id) ? 'Remove from Saved' : 'Save for Later'}
+                          >
+                            <HiBookmark />
+                          </button>
+                        )}
+                        <button
+                          className={`btn-compare-card ${compareList.some(c => c.id === car.id) ? 'active' : ''}`}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            toggleCompare(car)
+                          }}
+                          title="Compare this car"
+                        >
+                          <MdCompareArrows />
+                        </button>
+                        <button
+                          className="btn-book"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleViewDetails(car.id)
+                          }}
+                        >
+                          View Details
+                        </button>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </motion.div>
+
+              {filteredRentals.length === 0 && (
+                <div className="no-results">
+                  <h3>No cars found matching your search.</h3>
+                  <p>Try searching for a different brand or type.</p>
+                </div>
+              )}
+            </>
           )}
         </div>
       </section>
