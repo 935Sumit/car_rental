@@ -1,0 +1,96 @@
+﻿
+--- ANALYZING: src\admin\BookingCalendar.jsx ---
+[!] Unused Import: "HiCalendar"
+[!] Unused Import: "HiTruck"
+[!] Unused Variable: "navigate"
+
+--- ANALYZING: src\admin\Dashboard.jsx ---
+[!] Unused Import: "HiCash"
+[!] Unused Import: "HiCreditCard"
+[!] Unused Import: "HiDeviceMobile"
+
+--- ANALYZING: src\admin\ManageBookings.jsx ---
+[!] Unused Import: "useEffect"
+[!] Unused Variable: "handleUpdateStatus"
+
+--- ANALYZING: src\admin\ManageCars.jsx ---
+[!] Unused Import: "useEffect"
+
+--- ANALYZING: src\admin\ManageUsers.jsx ---
+
+--- ANALYZING: src\App.jsx ---
+[!] Unused Import: "BrowserRouter"
+
+--- ANALYZING: src\components\AdminRoute.jsx ---
+
+--- ANALYZING: src\components\AvailabilityCalendar.jsx ---
+[!] Unused Import: "AnimatePresence"
+
+--- ANALYZING: src\components\BookingModal.jsx ---
+[!] Unused Import: "useEffect"
+[!] Unused Import: "useCallback"
+[!] Unused State: "isProcessing" (Defined but never read)
+
+--- ANALYZING: src\components\CompareModal.jsx ---
+
+--- ANALYZING: src\components\ComparisonBar.jsx ---
+
+--- ANALYZING: src\components\ConfirmModal.jsx ---
+
+--- ANALYZING: src\components\ExtendBookingModal.jsx ---
+
+--- ANALYZING: src\components\Footer.jsx ---
+
+--- ANALYZING: src\components\Header.jsx ---
+
+--- ANALYZING: src\components\MockPaymentModal.jsx ---
+
+--- ANALYZING: src\components\SearchBar.jsx ---
+
+--- ANALYZING: src\components\Toast.jsx ---
+
+--- ANALYZING: src\context\AuthContext.jsx ---
+
+--- ANALYZING: src\context\CarContext.jsx ---
+
+--- ANALYZING: src\data\mockData.js ---
+[!] Unused Variable: "mockRentals"
+[!] Unused Variable: "carTypes"
+
+--- ANALYZING: src\main.jsx ---
+
+--- ANALYZING: src\pages\CarDetails.jsx ---
+
+--- ANALYZING: src\pages\Contact.jsx ---
+
+--- ANALYZING: src\pages\Home.jsx ---
+[!] Unused Import: "useMemo"
+[!] Unused Import: "AnimatePresence"
+[!] Unused Import: "HiRefresh"
+[!] Unused Setter: "setError" (Defined but never used)
+
+--- ANALYZING: src\pages\Login.jsx ---
+
+--- ANALYZING: src\pages\MyBookings.jsx ---
+[!] Unused Variable: "containerVariants"
+[!] Unused Variable: "cardVariants"
+[!] Unused Setter: "setCancelMessage" (Defined but never used)
+
+--- ANALYZING: src\pages\MyProfile.jsx ---
+[!] Unused Import: "HiCheckCircle"
+
+--- ANALYZING: src\pages\NotFound.jsx ---
+
+--- ANALYZING: src\pages\RentCars.jsx ---
+
+--- ANALYZING: src\pages\SavedCars.jsx ---
+[!] Unused Import: "AnimatePresence"
+
+--- ANALYZING: src\pages\Signup.jsx ---
+
+--- ANALYZING: src\scripts\uploadData.js ---
+
+--- ANALYZING: src\supabase\supabaseClient.js ---
+
+--- ANALYZING: src\utils\invoiceGenerator.js ---
+[!] Unused Variable: "downloadInvoice"

@@ -168,31 +168,11 @@
     margin-top: 10px;
 }
 
-.btn-extend {
-    padding: 14px 28px;
+.btn-action {
+    padding: 12px 24px;
     background: var(--primary-color);
     color: #fff;
     border: none;
-    border-radius: 12px;
-    font-weight: 800;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    font-size: 0.85rem;
-}
-
-.btn-extend:hover {
-    background: var(--primary-dark);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(88, 71, 56, 0.2);
-}
-
-.btn-download-invoice {
-    padding: 14px 28px;
-    background: var(--primary-color);
-    border: none;
-    color: #fff;
     border-radius: 12px;
     font-weight: 800;
     cursor: pointer;
@@ -202,34 +182,20 @@
     font-size: 0.85rem;
     display: flex;
     align-items: center;
-    gap: 8px;
+    justify-content: center;
+    gap: 10px;
+    min-width: 140px;
+    height: 48px;
 }
 
-.btn-download-invoice:hover {
+.btn-action:hover {
     background: var(--primary-dark);
-    color: #fff;
     transform: translateY(-2px);
     box-shadow: 0 6px 15px rgba(88, 71, 56, 0.2);
 }
 
-.btn-cancel {
-    padding: 14px 28px;
-    background: transparent;
-    border: 1.5px solid var(--error);
-    color: var(--error);
-    border-radius: 12px;
-    font-weight: 800;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    font-size: 0.85rem;
-}
-
-.btn-cancel:hover {
-    background: var(--error);
-    color: #fff;
-    transform: translateY(-2px);
+.btn-action svg {
+    font-size: 1.1rem;
 }
 
 .extended-badge {

@@ -15,15 +15,21 @@ import ManageCars from './admin/ManageCars'
 import ManageBookings from './admin/ManageBookings'
 import ManageUsers from './admin/ManageUsers'
 import BookingCalendar from './admin/BookingCalendar'
+import NotFound from './pages/NotFound'
+import AdminRoute from './components/AdminRoute'
+import { AuthProvider } from './context/AuthContext'
+import { useAuth } from './context/AuthContext'
 import './App.css'
 
 function App() {
   const PrivateRoute = ({ children }) => {
-    const user = localStorage.getItem('currentUser')
-    return user ? children : <Navigate to="/login" />
+    const { isLoggedIn, authLoading } = useAuth()
+    if (authLoading) return null
+    return isLoggedIn ? children : <Navigate to="/login" replace />
   }
 
   return (
+    <AuthProvider>
     <CarProvider>
       <Router>
         <div className="App">
@@ -46,19 +52,22 @@ function App() {
                 </PrivateRoute>
               } />
               <Route path="/car/:id" element={<CarDetails />} />
-              <Route path="/admin/dashboard" element={<Dashboard />} />
-              <Route path="/admin/cars" element={<ManageCars />} />
-              <Route path="/admin/bookings" element={<ManageBookings />} />
-              <Route path="/admin/users" element={<ManageUsers />} />
-        <Route path="/admin/calendar" element={<BookingCalendar />} />
+              <Route path="/admin/dashboard" element={<AdminRoute><Dashboard /></AdminRoute>} />
+              <Route path="/admin/cars" element={<AdminRoute><ManageCars /></AdminRoute>} />
+              <Route path="/admin/bookings" element={<AdminRoute><ManageBookings /></AdminRoute>} />
+              <Route path="/admin/users" element={<AdminRoute><ManageUsers /></AdminRoute>} />
+              <Route path="/admin/calendar" element={<AdminRoute><BookingCalendar /></AdminRoute>} />
               {/* Redirect old routes */}
               <Route path="/rent" element={<Navigate to="/" />} />
+              {/* 404 - catches all unknown URLs */}
+              <Route path="*" element={<NotFound />} />
             </Routes>
           </main>
           <Footer />
         </div>
       </Router>
     </CarProvider>
+    </AuthProvider>
   )
 }
 

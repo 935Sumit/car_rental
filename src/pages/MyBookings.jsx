@@ -1,42 +1,60 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { useCarContext } from '../context/CarContext'
+import { useAuth } from '../context/AuthContext'
 import ExtendBookingModal from '../components/ExtendBookingModal'
-import { HiCheckCircle, HiDownload } from 'react-icons/hi'
+import { HiDownload, HiSearch, HiCalendar, HiX } from 'react-icons/hi'
+import Toast from '../components/Toast'
+import ConfirmModal from '../components/ConfirmModal'
 import { FaCarSide } from 'react-icons/fa'
 import { downloadInvoice } from '../utils/invoiceGenerator'
 import './MyBookings.css'
 
 const MyBookings = () => {
     const { bookings, cancelBooking, rentals } = useCarContext()
-    const currentUser = JSON.parse(localStorage.getItem('currentUser'))
-    const [cancelMessage, setCancelMessage] = useState('')
+    const { currentUser } = useAuth()
+    const [cancelMessage] = useState('')
     const [extendingBooking, setExtendingBooking] = useState(null)
+    const [toast, setToast] = useState(null)
+    const [confirmModal, setConfirmModal] = useState(null)
+    const [searchQuery, setSearchQuery] = useState('')
+    const [statusFilter, setStatusFilter] = useState('All')
 
-    const userBookings = bookings.filter(b => b.userEmail === currentUser?.email && b.status !== 'Cancelled')
+    const statusTabs = ['All', 'Active', 'Extended', 'Cancelled']
+
+    const allUserBookings = useMemo(() =>
+        bookings.filter(b => b.userEmail === currentUser?.email),
+        [bookings, currentUser]
+    )
+
+    const userBookings = useMemo(() => {
+        return allUserBookings.filter(b => {
+            const matchesStatus = statusFilter === 'All' || b.status === statusFilter
+            const matchesSearch = !searchQuery ||
+                b.carName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                b.id?.toString().toLowerCase().includes(searchQuery.toLowerCase())
+            return matchesStatus && matchesSearch
+        })
+    }, [allUserBookings, statusFilter, searchQuery])
 
     const handleCancel = (bookingId) => {
-        if (window.confirm('Are you sure you want to cancel this booking?')) {
-            cancelBooking(bookingId)
-            setCancelMessage('Your booking has been cancelled successfully.')
-            window.scrollTo({ top: 0, behavior: 'smooth' })
-            setTimeout(() => setCancelMessage(''), 4000)
-        }
+        setConfirmModal({
+            message: 'Cancel this booking?',
+            subMessage: 'This action cannot be undone. Your reservation will be permanently cancelled.',
+            confirmText: 'Yes, Cancel Booking',
+            cancelText: 'No, Keep It',
+            type: 'danger',
+            onConfirm: () => {
+                cancelBooking(bookingId)
+                setConfirmModal(null)
+                setToast({ message: 'Booking cancelled successfully!', type: 'success' })
+            },
+            onCancel: () => setConfirmModal(null)
+        })
     }
 
-    const containerVariants = {
-        hidden: { opacity: 0 },
-        visible: {
-            opacity: 1,
-            transition: { staggerChildren: 0.1 }
-        }
-    }
 
-    const cardVariants = {
-        hidden: { opacity: 0, y: 20 },
-        visible: { opacity: 1, y: 0 }
-    }
 
     return (
         <div className="my-bookings-page">
@@ -49,6 +67,120 @@ const MyBookings = () => {
                         My Bookings
                     </motion.h1>
                     <p>Track and manage your car reservations easily.</p>
+
+                    {/* Search Bar */}
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '16px',
+                        background: '#fff',
+                        border: '1.5px solid #e5e7eb',
+                        borderRadius: '16px',
+                        padding: '16px 24px',
+                        margin: '32px auto 0',
+                        maxWidth: '650px',
+                        width: '100%',
+                        boxShadow: '0 4px 20px -4px rgba(0,0,0,0.05)',
+                        transition: 'border-color 0.2s ease, box-shadow 0.2s ease'
+                    }}
+                    className="search-bar-container-enhanced"
+                    >
+                        <HiSearch style={{ color: 'var(--primary-color)', fontSize: '24px', flexShrink: 0 }} />
+                        <input
+                            type="text"
+                            placeholder="Search by car name or booking ID..."
+                            value={searchQuery}
+                            onChange={e => setSearchQuery(e.target.value)}
+                            style={{
+                                border: 'none',
+                                outline: 'none',
+                                background: 'transparent',
+                                fontSize: '16px',
+                                width: '100%',
+                                color: '#1a1a1a',
+                                fontWeight: '500'
+                            }}
+                        />
+                        {searchQuery && (
+                            <button
+                                onClick={() => setSearchQuery('')}
+                                style={{
+                                    background: '#f3f4f6',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    color: '#6b7280',
+                                    fontSize: '18px',
+                                    padding: '4px',
+                                    borderRadius: '50%',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    width: '28px',
+                                    height: '28px'
+                                }}
+                            >×</button>
+                        )}
+                    </div>
+
+                    {/* Status Filter Tabs */}
+                    <div style={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        gap: '12px',
+                        marginTop: '24px',
+                        flexWrap: 'wrap'
+                    }}>
+                        {statusTabs.map(tab => {
+                            const isActive = statusFilter === tab;
+                            const count = tab === 'All'
+                                ? allUserBookings.length
+                                : allUserBookings.filter(b => b.status === tab).length;
+
+                            return (
+                                <button
+                                    key={tab}
+                                    onClick={() => setStatusFilter(tab)}
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '8px',
+                                        padding: '10px 24px',
+                                        borderRadius: '100px',
+                                        border: isActive ? '2px solid var(--primary-color, #5c3d1e)' : '2px solid #e5e7eb',
+                                        background: isActive ? 'var(--primary-color, #5c3d1e)' : '#fff',
+                                        color: isActive ? '#fff' : '#4b5563',
+                                        fontWeight: isActive ? '700' : '600',
+                                        fontSize: '14px',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                        boxShadow: isActive ? '0 8px 16px -4px rgba(92, 61, 30, 0.3)' : '0 2px 8px rgba(0,0,0,0.04)'
+                                    }}
+                                >
+                                    {tab}
+                                    <span style={{
+                                        background: isActive ? 'rgba(255,255,255,0.25)' : '#f3f4f6',
+                                        color: isActive ? '#fff' : '#6b7280',
+                                        borderRadius: '50px',
+                                        padding: '2px 8px',
+                                        fontSize: '12px',
+                                        fontWeight: '800'
+                                    }}>
+                                        {count}
+                                    </span>
+                                </button>
+                            )
+                        })}
+                    </div>
+
+                    {/* Results count */}
+                    <p style={{
+                        marginTop: '16px',
+                        fontSize: '14px',
+                        color: '#6b7280',
+                        fontWeight: '500'
+                    }}>
+                        Showing <strong style={{color: '#111827'}}>{userBookings.length}</strong> of <strong style={{color: '#111827'}}>{allUserBookings.length}</strong> bookings
+                    </p>
                 </header>
 
                 <AnimatePresence>
@@ -80,16 +212,15 @@ const MyBookings = () => {
                 ) : (
                     <motion.div
                         className="bookings-grid"
-                        variants={containerVariants}
-                        initial="hidden"
-                        animate="visible"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
                     >
                         {userBookings.map(booking => {
                             const car = rentals.find(r => r.id === booking.carId)
                             const displayImage = car?.image || booking.carImage || 'https://via.placeholder.com/300x200?text=Car'
 
                             return (
-                                <motion.div key={booking.id} variants={cardVariants} className="booking-card-redesign">
+                                <motion.div key={booking.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }} className="booking-card-redesign">
                                     <div className="booking-image">
                                         <img
                                             src={displayImage}
@@ -158,23 +289,23 @@ const MyBookings = () => {
                                         </div>
                                         <div className="booking-actions">
                                             <button
-                                                className="btn-extend"
+                                                className="btn-action btn-extend"
                                                 onClick={() => setExtendingBooking(booking)}
                                             >
-                                                Extend Booking
+                                                <HiCalendar /> Extend
                                             </button>
                                             <button
-                                                className="btn-download-invoice"
+                                                className="btn-action btn-download-invoice"
                                                 onClick={() => downloadInvoice(booking, currentUser)}
                                                 title="Download Official Invoice"
                                             >
                                                 <HiDownload /> Invoice
                                             </button>
                                             <button
-                                                className="btn-cancel"
+                                                className="btn-action btn-cancel"
                                                 onClick={() => handleCancel(booking.id)}
                                             >
-                                                Cancel Booking
+                                                <HiX /> Cancel
                                             </button>
                                         </div>
                                     </div>
@@ -189,6 +320,24 @@ const MyBookings = () => {
                 <ExtendBookingModal
                     booking={extendingBooking}
                     onClose={() => setExtendingBooking(null)}
+                />
+            )}
+            {toast && (
+                <Toast
+                    message={toast.message}
+                    type={toast.type}
+                    onClose={() => setToast(null)}
+                />
+            )}
+            {confirmModal && (
+                <ConfirmModal
+                    message={confirmModal.message}
+                    subMessage={confirmModal.subMessage}
+                    confirmText={confirmModal.confirmText}
+                    cancelText={confirmModal.cancelText}
+                    type={confirmModal.type}
+                    onConfirm={confirmModal.onConfirm}
+                    onCancel={confirmModal.onCancel}
                 />
             )}
         </div>

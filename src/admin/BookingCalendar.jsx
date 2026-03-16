@@ -1,11 +1,9 @@
 import { useState, useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { useCarContext } from '../context/CarContext'
-import { HiChevronLeft, HiChevronRight, HiCalendar, HiTruck } from 'react-icons/hi'
+import { HiChevronLeft, HiChevronRight } from 'react-icons/hi'
 import './BookingCalendar.css'
 
 const BookingCalendar = () => {
-    const navigate = useNavigate()
     const { rentals, bookings } = useCarContext()
     
     // Date navigation state

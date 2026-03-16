@@ -4,6 +4,8 @@ import { motion } from 'framer-motion'
 import { useCarContext } from '../context/CarContext'
 import BookingModal from '../components/BookingModal'
 import { HiLocationMarker, HiCheckCircle, HiChartBar, HiBookmark } from 'react-icons/hi'
+import Toast from '../components/Toast'
+import { useAuth } from '../context/AuthContext'
 import { FaGasPump, FaGear, FaChair } from 'react-icons/fa6'
 import './CarDetails.css'
 
@@ -11,9 +13,11 @@ const CarDetails = () => {
     const { id } = useParams()
     const navigate = useNavigate()
     const { rentals, toggleSaveCar, isCarSaved } = useCarContext()
+    const { currentUser } = useAuth()
     const [car, setCar] = useState(null)
     const [agreed, setAgreed] = useState(false)
     const [showBookingModal, setShowBookingModal] = useState(false)
+    const [toast, setToast] = useState(null)
 
     useEffect(() => {
         const foundCar = rentals.find(r => r.id === id)
@@ -26,10 +30,9 @@ const CarDetails = () => {
     if (!car) return <div className="loading">Loading...</div>
 
     const handleBookNow = () => {
-        const currentUser = JSON.parse(localStorage.getItem('currentUser'))
         if (!currentUser) {
-            alert('Please login to book a car')
-            navigate('/login')
+            setToast({ message: 'Please login to book a car!', type: 'warning' })
+            setTimeout(() => navigate('/login'), 1500)
             return
         }
         setShowBookingModal(true)
@@ -169,6 +172,13 @@ const CarDetails = () => {
                 <BookingModal
                     rental={car}
                     onClose={() => setShowBookingModal(false)}
+                />
+            )}
+            {toast && (
+                <Toast
+                    message={toast.message}
+                    type={toast.type}
+                    onClose={() => setToast(null)}
                 />
             )}
         </div>

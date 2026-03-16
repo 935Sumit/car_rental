@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
 import { motion } from 'framer-motion'
 import logo from '../assets/final logo.jpg.png'
 import './Header.css'
@@ -8,13 +9,11 @@ const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const location = useLocation()
+  const navigate = useNavigate()
 
-  const [currentUser, setCurrentUser] = useState(null)
+  const { currentUser, logout } = useAuth()
 
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem('currentUser'))
-    setCurrentUser(user)
-
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50)
     }
@@ -23,10 +22,8 @@ const Header = () => {
   }, [])
 
   const handleLogout = () => {
-    localStorage.removeItem('currentUser')
-    localStorage.removeItem('adminLoggedIn')
-    setCurrentUser(null)
-    window.location.reload()
+    logout()
+    navigate('/')
   }
 
   const isActive = (path) => location.pathname === path

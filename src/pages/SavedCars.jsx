@@ -1,6 +1,7 @@
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { useCarContext } from '../context/CarContext'
+import { useAuth } from '../context/AuthContext'
 import BookingModal from '../components/BookingModal'
 import { useState } from 'react'
 import './Home.css' // Reuse grid styles
@@ -8,6 +9,7 @@ import './Home.css' // Reuse grid styles
 const SavedCars = () => {
     const navigate = useNavigate()
     const { savedCars, toggleSaveCar, rentals } = useCarContext()
+    const { currentUser } = useAuth()
     const [selectedRental, setSelectedRental] = useState(null)
     const [showBookingModal, setShowBookingModal] = useState(false)
 
