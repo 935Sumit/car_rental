@@ -1,25 +1,10 @@
-import { useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { useCarContext } from '../context/CarContext'
 import './Dashboard.css'
 import './ManageCars.css'
 import './ManageBookings.css'
 
 const ManageBookings = () => {
-    const navigate = useNavigate()
     const { bookings, updateBookingStatus, deleteBooking, loading } = useCarContext()
-
-    useEffect(() => {
-        const isAdmin = localStorage.getItem('adminLoggedIn')
-        if (isAdmin !== 'true') {
-            navigate('/login')
-            return
-        }
-    }, [navigate])
-
-    const handleUpdateStatus = (id, newStatus) => {
-        updateBookingStatus(id, newStatus)
-    }
 
     const handleDelete = (id) => {
         if (window.confirm('Are you sure you want to delete this booking record?')) {

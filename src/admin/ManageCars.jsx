@@ -1,12 +1,10 @@
-import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState } from 'react'
 import { useCarContext } from '../context/CarContext'
 import { supabase } from '../supabase/supabaseClient'
 import './Dashboard.css'
 import './ManageCars.css'
 
 const ManageCars = () => {
-    const navigate = useNavigate()
     const { rentals, addCar, deleteCar, updateCar } = useCarContext()
     const [loading, setLoading] = useState(false)
     const [showModal, setShowModal] = useState(false)
@@ -29,13 +27,6 @@ const ManageCars = () => {
     })
     const [imageFile, setImageFile] = useState(null)
 
-    useEffect(() => {
-        const isAdmin = localStorage.getItem('adminLoggedIn')
-        if (isAdmin !== 'true') {
-            navigate('/login')
-            return
-        }
-    }, [navigate])
 
     const handleInputChange = (e) => {
         const { name, value, files } = e.target

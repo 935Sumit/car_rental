@@ -2,34 +2,39 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useCarContext } from '../context/CarContext'
 import { supabase } from '../supabase/supabaseClient'
-import { HiCheckCircle, HiUser, HiMail, HiPhone, HiBadgeCheck } from 'react-icons/hi'
+import { HiUser, HiMail, HiPhone, HiBadgeCheck } from 'react-icons/hi'
+import { useAuth } from '../context/AuthContext'
+import Toast from '../components/Toast'
+import ConfirmModal from '../components/ConfirmModal'
 import './MyProfile.css'
 
 const MyProfile = () => {
     const { bookings, savedCars } = useCarContext()
+    const { currentUser } = useAuth()
     const [user, setUser] = useState(null)
     const [isEditingLicense, setIsEditingLicense] = useState(false)
     const [licenseInput, setLicenseInput] = useState('')
     const [isUpdating, setIsUpdating] = useState(false)
+    const [toast, setToast] = useState(null)
+    const [confirmModal, setConfirmModal] = useState(null)
 
     useEffect(() => {
-        const currentUser = JSON.parse(localStorage.getItem('currentUser'))
         if (currentUser) {
             setUser(currentUser)
             setLicenseInput(currentUser.licenseNumber || '')
         }
-    }, [])
+    }, [currentUser])
 
     const handleSaveLicense = async () => {
         const licenseRegex = /^GJ-[0-9]{2}-[0-9]{4}-[0-9]{7}$/
 
         if (!licenseInput.trim()) {
-            alert('Please enter a valid license number')
+            setToast({ message: 'Please enter a valid license number!', type: 'warning' })
             return
         }
 
         if (!licenseRegex.test(licenseInput.trim())) {
-            alert('Invalid license format. Use GJ-05-2023-1234567 format.')
+            setToast({ message: 'Invalid format. Use GJ-05-2023-1234567 format.', type: 'error' })
             return
         }
 
@@ -47,36 +52,46 @@ const MyProfile = () => {
             setUser(updatedUser)
             localStorage.setItem('currentUser', JSON.stringify(updatedUser))
             setIsEditingLicense(false)
+            setToast({ message: 'License saved successfully!', type: 'success' })
         } catch (error) {
             console.error('Error saving license:', error)
-            alert('Failed to save license to Supabase')
+            setToast({ message: 'Failed to save license. Try again.', type: 'error' })
         } finally {
             setIsUpdating(false)
         }
     }
 
-    const handleRemoveLicense = async () => {
-        if (window.confirm('Are you sure you want to remove your driving license? You will not be able to book any cars until you add it back.')) {
-            setIsUpdating(true)
-            try {
-                const { error } = await supabase
-                    .from('users')
-                    .update({ licenseNumber: null })
-                    .eq('id', user.id)
-                
-                if (error) throw error
-
-                const updatedUser = { ...user, licenseNumber: '' }
-                setUser(updatedUser)
-                setLicenseInput('')
-                localStorage.setItem('currentUser', JSON.stringify(updatedUser))
-            } catch (error) {
-                console.error('Error removing license:', error)
-                alert('Failed to remove license from Supabase')
-            } finally {
-                setIsUpdating(false)
-            }
-        }
+    const handleRemoveLicense = () => {
+        setConfirmModal({
+            message: 'Remove your driving license?',
+            subMessage: 'You will not be able to book any cars until you add it back.',
+            confirmText: 'Yes, Remove',
+            cancelText: 'No, Keep It',
+            type: 'warning',
+            onConfirm: async () => {
+                setIsUpdating(true)
+                try {
+                    const { error } = await supabase
+                        .from('users')
+                        .update({ licenseNumber: null })
+                        .eq('id', user.id)
+                    if (error) throw error
+                    const updatedUser = { ...user, licenseNumber: '' }
+                    setUser(updatedUser)
+                    setLicenseInput('')
+                    localStorage.setItem('currentUser', JSON.stringify(updatedUser))
+                    setConfirmModal(null)
+                    setToast({ message: 'License removed successfully.', type: 'success' })
+                } catch (error) {
+                    console.error('Error removing license:', error)
+                    setConfirmModal(null)
+                    setToast({ message: 'Failed to remove license. Try again.', type: 'error' })
+                } finally {
+                    setIsUpdating(false)
+                }
+            },
+            onCancel: () => setConfirmModal(null)
+        })
     }
 
     if (!user) return <div className="loading">Loading Profile...</div>
@@ -213,6 +228,24 @@ const MyProfile = () => {
                     </button>
                 </div>
             </div>
+            {toast && (
+                <Toast
+                    message={toast.message}
+                    type={toast.type}
+                    onClose={() => setToast(null)}
+                />
+            )}
+            {confirmModal && (
+                <ConfirmModal
+                    message={confirmModal.message}
+                    subMessage={confirmModal.subMessage}
+                    confirmText={confirmModal.confirmText}
+                    cancelText={confirmModal.cancelText}
+                    type={confirmModal.type}
+                    onConfirm={confirmModal.onConfirm}
+                    onCancel={confirmModal.onCancel}
+                />
+            )}
         </div>
     )
 }

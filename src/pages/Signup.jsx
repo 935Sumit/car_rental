@@ -2,10 +2,12 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { supabase } from '../supabase/supabaseClient'
+import { useAuth } from '../context/AuthContext'
 import './Auth.css'
 
 const Signup = () => {
   const navigate = useNavigate()
+  const { login } = useAuth()
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -78,17 +80,16 @@ const Signup = () => {
       if (dbError) throw dbError
 
       // 4. Auto-Login
-      localStorage.setItem('currentUser', JSON.stringify(newUser || {
+      login(newUser || {
         id: newId,
         fullName: formData.fullName,
         email: formData.email,
         role: 'user'
-      }))
+      })
 
       setIsLoading(false)
       alert("Registration successful! Welcome to Vintage Rides Hub.")
       navigate('/')
-      window.location.reload()
     } catch (error) {
       console.error("Signup error detail:", error)
       setErrors({ auth: error.message || 'Failed to create account. Please try again.' })

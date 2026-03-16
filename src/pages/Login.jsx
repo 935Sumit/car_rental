@@ -2,10 +2,12 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { supabase } from '../supabase/supabaseClient'
+import { useAuth } from '../context/AuthContext'
 import './Auth.css'
 
 const Login = () => {
   const navigate = useNavigate()
+  const { login } = useAuth()
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -57,25 +59,34 @@ const Login = () => {
         return
       }
 
-      localStorage.setItem('currentUser', JSON.stringify(userData))
-      
-      // Check if user is Admin dynamically from Database
+      login(userData)
+
+      // Record successful login
+      await supabase.from('login_logs').insert([{
+        user_email: userData.email,
+        user_name: userData.fullName || 'Unknown',
+        status: 'success'
+      }])
+
       if (userData.role === 'admin') {
-          localStorage.setItem('adminLoggedIn', 'true')
           setIsLoading(false)
           navigate('/admin/dashboard')
-          window.location.reload()
           return
       }
 
       // Normal User Login
       setIsLoading(false)
       navigate('/')
-      window.location.reload()
     } catch (error) {
       console.error("Login detail error:", error)
       setErrors({ auth: error.message || 'Invalid email or password' })
       setIsLoading(false)
+      // Record failed login attempt
+      await supabase.from('login_logs').insert([{
+        user_email: formData.email,
+        user_name: 'Unknown',
+        status: 'failed'
+      }])
     }
   }
 

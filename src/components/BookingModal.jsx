@@ -1,4 +1,5 @@
-import { useState, useMemo, useEffect, useRef } from 'react'
+import { useState, useMemo, useRef } from 'react'
+import { useAuth } from '../context/AuthContext'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { useCarContext } from '../context/CarContext'
@@ -10,7 +11,8 @@ import './BookingModal.css'
 const BookingModal = ({ rental, onClose }) => {
   const { checkAvailability, addBooking, bookings } = useCarContext()
   const navigate = useNavigate()
-  const currentUser = JSON.parse(localStorage.getItem('currentUser')) || {}
+  const { currentUser: authUser } = useAuth()
+  const currentUser = authUser || JSON.parse(localStorage.getItem('currentUser')) || {}
   const [bookingId, setBookingId] = useState('')
   const receiptRef = useRef(null)
   const redirectTimerRef = useRef(null)
@@ -22,14 +24,55 @@ const BookingModal = ({ rental, onClose }) => {
     driveType: 'self'
   })
   const [submitted, setSubmitted] = useState(false)
-  const [error, setError] = useState('')
+  const [fieldErrors, setFieldErrors] = useState({})
   const [useSavedLicense, setUseSavedLicense] = useState(!!currentUser.licenseNumber)
   const [licenseInput, setLicenseInput] = useState('')
-  const [isProcessing, setIsProcessing] = useState(false)
   const [showMockPayment, setShowMockPayment] = useState(false)
   const [isPaid, setIsPaid] = useState(false)
   const [paymentResponse, setPaymentResponse] = useState(null)
   const [pendingBookingData, setPendingBookingData] = useState(null)
+  const [currentStep, setCurrentStep] = useState(1)
+  const [specialRequests, setSpecialRequests] = useState('')
+  const [couponCode, setCouponCode] = useState('')
+  const [couponApplied, setCouponApplied] = useState(false)
+  const [couponDiscount, setCouponDiscount] = useState(0)
+  const [couponError, setCouponError] = useState('')
+  const [showCouponsList, setShowCouponsList] = useState(false)
+
+  // Valid coupon codes
+  const couponsData = [
+    { code: 'SAVE10', discount: 10, desc: '10% off on all vintage rides' },
+    { code: 'VINTAGE20', discount: 20, desc: '20% off for the classic lovers' },
+    { code: 'WELCOME25', discount: 25, desc: '25% off on your first booking' },
+    { code: 'FIRST15', discount: 15, desc: '15% off for first-time explorers' },
+    { code: 'RIDE5', discount: 5, desc: '5% extra discount' }
+  ]
+
+  const validCoupons = couponsData.reduce((acc, curr) => ({ ...acc, [curr.code]: curr.discount }), {})
+
+  const handleApplyCoupon = () => {
+    const code = couponCode.trim().toUpperCase()
+    if (!code) {
+      setCouponError('Please enter a coupon code')
+      return
+    }
+    if (validCoupons[code]) {
+      setCouponDiscount(validCoupons[code])
+      setCouponApplied(true)
+      setCouponError('')
+    } else {
+      setCouponError('Invalid coupon code. Try SAVE10 or VINTAGE20!')
+      setCouponDiscount(0)
+      setCouponApplied(false)
+    }
+  }
+
+  const handleRemoveCoupon = () => {
+    setCouponCode('')
+    setCouponDiscount(0)
+    setCouponApplied(false)
+    setCouponError('')
+  }
 
   const paymentOptions = [
     { id: 'cod', label: 'Cash on Delivery', icon: <HiCash /> },
@@ -40,7 +83,8 @@ const BookingModal = ({ rental, onClose }) => {
   const handleChange = (e) => {
     const { name, value } = e.target
     setFormData({ ...formData, [name]: value })
-    setError('') // Clear error on change
+    setFieldErrors(prev => ({ ...prev, [name]: '', dates: '', general: '' }))
+    if (name === 'endDate' && value) setCurrentStep(2)
   }
 
   const duration = useMemo(() => {
@@ -69,10 +113,16 @@ const BookingModal = ({ rental, onClose }) => {
     else if (duration >= 2) discountPercent = 5
 
     const discountAmount = (subtotal * discountPercent) / 100
-    const finalPrice = subtotal - discountAmount
+    const afterDuration = subtotal - discountAmount
+    const couponAmount = (afterDuration * couponDiscount) / 100
+    const finalPrice = afterDuration - couponAmount
 
-    return { subtotal, discountPercent, discountAmount, finalPrice, chauffeurFee }
-  }, [duration, rental.pricePerDay, formData.driveType])
+    return {
+      subtotal, discountPercent, discountAmount,
+      couponAmount, couponDiscount,
+      finalPrice, chauffeurFee
+    }
+  }, [duration, rental.pricePerDay, formData.driveType, couponDiscount])
 
   const playSuccessSound = () => {
     const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2018/2018-preview.mp3')
@@ -107,6 +157,9 @@ const BookingModal = ({ rental, onClose }) => {
       totalPrice: pricing.finalPrice,
       paymentMethod: formData.paymentMethod,
       pickupAddress: '100 ft Road, Anand, 388001',
+      specialRequests: specialRequests || 'None',
+      couponCode: couponApplied ? couponCode : null,
+      couponDiscount: couponDiscount,
       status: 'Active',
       ...(payDetails ? {
         paymentId: payDetails.razorpay_payment_id,
@@ -116,12 +169,17 @@ const BookingModal = ({ rental, onClose }) => {
     }
 
     try {
-      await addBooking(finalBookingData)
+      const { error } = await addBooking(finalBookingData)
+      if (error) {
+        console.error("Supabase Database Error:", error)
+        setFieldErrors({ general: `Booking failed: ${error.message}.` })
+        return
+      }
       playSuccessSound()
       setSubmitted(true)
     } catch (e) {
       console.error("Booking error:", e)
-      setError("Failed to create booking. Please try again.")
+      setFieldErrors({ general: "Failed to create booking. Please try again." })
     }
 
     // Auto-close and redirect after 10 seconds (giving more time for download)
@@ -159,7 +217,6 @@ const BookingModal = ({ rental, onClose }) => {
     setPaymentResponse(response)
     setIsPaid(true)
     setShowMockPayment(false)
-    setIsProcessing(false)
 
     // Auto-confirm booking directly after payment
     finalizeBooking(response)
@@ -167,62 +224,51 @@ const BookingModal = ({ rental, onClose }) => {
 
   const handleMockPaymentFailure = () => {
     setShowMockPayment(false)
-    setIsProcessing(false)
-    setError('Payment failed. Please try again.')
   }
 
   const handleMockPaymentClose = () => {
     setShowMockPayment(false)
-    setIsProcessing(false)
-    setError('Payment was cancelled. Please try again to secure your booking.')
+    setFieldErrors(prev => ({ ...prev, payment: 'Payment was cancelled. Please try again to secure your booking.' }))
   }
 
   const validateForm = () => {
+    const newErrors = {}
+    
     if (duration <= 0) {
-      setError('End date must be after or same as start date')
-      return false
+      newErrors.dates = 'End date must be after or same as start date'
     }
 
     const licenseToUse = useSavedLicense ? currentUser.licenseNumber : licenseInput.trim()
     const licenseRegex = /^GJ-[0-9]{2}-[0-9]{4}-[0-9]{7}$/
 
     if (!licenseToUse) {
-      setError('Please provide a valid driving licence to continue.')
-      return false
-    }
-
-    if (!licenseRegex.test(licenseToUse)) {
-      setError('Invalid licence format. Use GJ-05-2023-1234567 format.')
-      return false
+      newErrors.license = 'Please provide a valid driving licence to continue.'
+    } else if (!licenseRegex.test(licenseToUse)) {
+      newErrors.license = 'Invalid licence format. Use GJ-05-2023-1234567.'
     }
 
     if (rental.status === 'maintenance') {
-      setError('This car is currently under maintenance and cannot be booked.')
-      return false
-    }
-
-    if (rental.status === 'booked') {
-      setError('This car is currently marked as booked and is not available for new reservations.')
-      return false
+      newErrors.general = 'This car is currently under maintenance.'
+    } else if (rental.status === 'booked') {
+      newErrors.general = 'This car is currently marked as booked.'
     }
 
     const isAvailable = checkAvailability(rental.id, formData.startDate, formData.endDate)
-    if (!isAvailable) {
-      setError('This car is already booked for the selected dates.')
-      return false
+    if (formData.startDate && formData.endDate && !isAvailable) {
+      newErrors.dates = 'This car is already booked for these dates.'
     }
 
-    return true
+    setFieldErrors(newErrors)
+    return Object.keys(newErrors).length === 0
   }
 
   const handlePaymentMethodSelect = (methodLabel) => {
-    // If already paid, don't allow changing method or triggering portal again
     if (isPaid) return
-
+    setCurrentStep(3)
     setFormData({ ...formData, paymentMethod: methodLabel })
     setIsPaid(false)
     setPaymentResponse(null)
-    setError('')
+    setFieldErrors(prev => ({ ...prev, payment: '', general: '' }))
 
     if (methodLabel === 'UPI Payment' || methodLabel === 'Card Payment') {
       if (validateForm()) {
@@ -234,7 +280,6 @@ const BookingModal = ({ rental, onClose }) => {
         setPendingBookingData(tempBookingData)
         setShowMockPayment(true)
       } else {
-        // Reset choice if invalid
         setFormData({ ...formData, paymentMethod: '' })
       }
     }
@@ -246,12 +291,12 @@ const BookingModal = ({ rental, onClose }) => {
     if (!validateForm()) return
 
     if (!formData.paymentMethod) {
-      setError('Please select a payment method.')
+      setFieldErrors(prev => ({ ...prev, payment: 'Please select a payment method.' }))
       return
     }
 
     if (formData.paymentMethod !== 'Cash on Delivery' && !isPaid) {
-      setError('Please complete the payment before confirming.')
+      setFieldErrors(prev => ({ ...prev, payment: 'Please complete the payment before confirming.' }))
       return
     }
 
@@ -378,7 +423,58 @@ const BookingModal = ({ rental, onClose }) => {
               </div>
             ) : (
               <>
-                <div className="modal-header">
+              {/* Progress Bar */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                marginBottom: '20px',
+                padding: '0 10px'
+              }}>
+                {[
+                  { num: 1, label: 'Dates' },
+                  { num: 2, label: 'Extras' },
+                  { num: 3, label: 'Payment' }
+                ].map((s, i) => (
+                  <div key={s.num} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div style={{ textAlign: 'center' }}>
+                      <div style={{
+                        width: '32px', height: '32px',
+                        borderRadius: '50%',
+                        background: currentStep >= s.num
+                          ? 'var(--primary-color, #5c3d1e)'
+                          : '#e5e7eb',
+                        color: currentStep >= s.num ? '#fff' : '#999',
+                        display: 'flex', alignItems: 'center',
+                        justifyContent: 'center',
+                        fontWeight: '800', fontSize: '13px',
+                        margin: '0 auto'
+                      }}>
+                        {currentStep > s.num ? '✓' : s.num}
+                      </div>
+                      <p style={{
+                        fontSize: '11px', margin: '4px 0 0',
+                        color: currentStep >= s.num
+                          ? 'var(--primary-color, #5c3d1e)'
+                          : '#999',
+                        fontWeight: currentStep >= s.num ? '700' : '400'
+                      }}>{s.label}</p>
+                    </div>
+                    {i < 2 && (
+                      <div style={{
+                        width: '50px', height: '2px',
+                        background: currentStep > s.num
+                          ? 'var(--primary-color, #5c3d1e)'
+                          : '#e5e7eb',
+                        marginBottom: '16px'
+                      }} />
+                    )}
+                  </div>
+                ))}
+              </div>
+              <div className="modal-header">
+
                   <div className="header-title">
                     <h2>Book {rental.name}</h2>
                     <span className="city-badge">{rental.city}</span>
@@ -387,7 +483,7 @@ const BookingModal = ({ rental, onClose }) => {
                 </div>
 
                 <form onSubmit={handleSubmit} className="booking-form">
-                  {error && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="error-message-box">{error}</motion.div>}
+                  {fieldErrors.general && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="error-message-box">{fieldErrors.general}</motion.div>}
 
                   <div className="form-info-summary">
                     <p>Booking for: <strong>{currentUser.fullName}</strong></p>
@@ -417,6 +513,7 @@ const BookingModal = ({ rental, onClose }) => {
                       />
                     </div>
                   </div>
+                  {fieldErrors.dates && <p className="field-error-text" style={{ color: '#dc2626', fontSize: '13px', marginTop: '-12px', marginBottom: '20px', fontWeight: '700', textAlign: 'center' }}>{fieldErrors.dates}</p>}
 
                   {rental.chauffeurAvailable && (
                     <div className="drive-type-selection">
@@ -471,11 +568,128 @@ const BookingModal = ({ rental, onClose }) => {
                           placeholder="Enter Licence (e.g. GJ-05-2023-1234567)"
                           value={licenseInput}
                           onChange={(e) => setLicenseInput(e.target.value.toUpperCase())}
-                          className="license-input"
+                          className={`license-input ${fieldErrors.license ? 'error' : ''}`}
                         />
                         <p className="input-hint">Format: GJ-XX-YYYY-ZZZZZZZ</p>
                       </div>
                     )}
+                    {fieldErrors.license && <p className="field-error-text" style={{ color: '#dc2626', fontSize: '12px', marginTop: '-8px', marginBottom: '16px', fontWeight: '600' }}>{fieldErrors.license}</p>}
+                  </div>
+
+                  {/* Coupon Code - Moved before Payment */}
+                  <div style={{ marginBottom: '24px', background: '#f9fafb', padding: '16px', borderRadius: '12px', border: '1.5px solid #f3f4f6' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                      <label style={{ fontSize: '13px', fontWeight: '700', color: '#374151' }}>
+                        🎟️ Have a Coupon?
+                      </label>
+                      <button 
+                        type="button" 
+                        onClick={() => setShowCouponsList(!showCouponsList)}
+                        style={{ background: 'none', border: 'none', color: 'var(--primary-color, #5c3d1e)', fontSize: '12px', fontWeight: '700', cursor: 'pointer', textDecoration: 'underline' }}
+                      >
+                        {showCouponsList ? 'Hide Coupons' : 'View Available'}
+                      </button>
+                    </div>
+
+                    <AnimatePresence>
+                      {showCouponsList && (
+                        <motion.div 
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          style={{ overflow: 'hidden', marginBottom: '14px' }}
+                        >
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '10px 0' }}>
+                            {couponsData.map(c => (
+                              <div 
+                                key={c.code} 
+                                onClick={() => { setCouponCode(c.code); setShowCouponsList(false); setCouponError('') }}
+                                style={{ 
+                                  padding: '10px', borderRadius: '8px', background: '#fff', 
+                                  border: '1px dashed #d1d5db', cursor: 'pointer',
+                                  transition: '0.2s', display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+                                }}
+                              >
+                                <div>
+                                  <span style={{ fontWeight: '800', color: 'var(--primary-color, #5c3d1e)', fontSize: '13px' }}>{c.code}</span>
+                                  <p style={{ margin: 0, fontSize: '11px', color: '#666' }}>{c.desc}</p>
+                                </div>
+                                <span style={{ fontSize: '12px', fontWeight: '700', color: '#059669' }}>{c.discount}% OFF</span>
+                              </div>
+                            ))}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+
+                    {!couponApplied ? (
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <input
+                          type="text"
+                          placeholder="Try SAVE10"
+                          value={couponCode}
+                          onChange={e => { setCouponCode(e.target.value.toUpperCase()); setCouponError('') }}
+                          style={{
+                            flex: 1, padding: '10px 14px',
+                            borderRadius: '8px',
+                            border: '1.5px solid #e5e7eb',
+                            fontSize: '13px', outline: 'none'
+                          }}
+                        />
+                        <button
+                          type="button"
+                          onClick={handleApplyCoupon}
+                          style={{
+                            padding: '10px 16px',
+                            background: 'var(--primary-color, #5c3d1e)',
+                            color: '#fff', border: 'none',
+                            borderRadius: '8px', fontWeight: '700',
+                            fontSize: '13px', cursor: 'pointer'
+                          }}
+                        >Apply</button>
+                      </div>
+                    ) : (
+                      <div style={{
+                        display: 'flex', alignItems: 'center',
+                        justifyContent: 'space-between',
+                        background: '#f0fdf4',
+                        border: '1.5px solid #bbf7d0',
+                        borderRadius: '8px', padding: '10px 14px'
+                      }}>
+                        <span style={{ color: '#059669', fontWeight: '700', fontSize: '13px' }}>
+                          ✅ {couponCode} Applied!
+                        </span>
+                        <button
+                          type="button"
+                          onClick={handleRemoveCoupon}
+                          style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', fontSize: '13px' }}
+                        >Remove</button>
+                      </div>
+                    )}
+                    {couponError && (
+                      <p style={{ color: '#dc2626', fontSize: '12px', marginTop: '4px' }}>{couponError}</p>
+                    )}
+                  </div>
+
+                  {/* Special Requests - Moved before Payment */}
+                  <div style={{ marginBottom: '24px' }}>
+                    <label style={{ fontSize: '13px', fontWeight: '700', color: '#374151', display: 'block', marginBottom: '8px' }}>
+                      📝 Special Requests (optional)
+                    </label>
+                    <textarea
+                      placeholder="e.g. need child seat, early pickup, specific colour..."
+                      value={specialRequests}
+                      onChange={e => setSpecialRequests(e.target.value)}
+                      rows={2}
+                      style={{
+                        width: '100%', padding: '10px 14px',
+                        borderRadius: '8px',
+                        border: '1.5px solid #e5e7eb',
+                        fontSize: '13px', outline: 'none',
+                        resize: 'none', boxSizing: 'border-box',
+                        fontFamily: 'inherit'
+                      }}
+                    />
                   </div>
 
                   <div className="payment-selection">
@@ -484,7 +698,7 @@ const BookingModal = ({ rental, onClose }) => {
                       {paymentOptions.map(option => (
                         <div
                           key={option.id}
-                          className={`payment-option ${formData.paymentMethod === option.label ? 'active' : ''} ${isPaid && formData.paymentMethod === option.label ? 'paid-success' : ''} ${isPaid ? 'paid-lock' : ''}`}
+                          className={`payment-option ${formData.paymentMethod === option.label ? 'active' : ''} ${isPaid && formData.paymentMethod === option.label ? 'paid-success' : ''} ${isPaid ? 'paid-lock' : ''} ${fieldErrors.payment ? 'error-ring' : ''}`}
                           onClick={() => handlePaymentMethodSelect(option.label)}
                         >
                           <span className="pay-icon">
@@ -497,6 +711,7 @@ const BookingModal = ({ rental, onClose }) => {
                         </div>
                       ))}
                     </div>
+                    {fieldErrors.payment && <p className="field-error-text" style={{ color: '#dc2626', fontSize: '12px', marginTop: '8px', fontWeight: '600', textAlign: 'center' }}>{fieldErrors.payment}</p>}
                   </div>
 
                   <div className="booking-summary">
@@ -533,6 +748,18 @@ const BookingModal = ({ rental, onClose }) => {
                       <span>₹{pricing.finalPrice.toLocaleString('en-IN')}</span>
                     </div>
                   </div>
+
+
+
+                  {/* Coupon discount in summary */}
+                  {couponApplied && pricing.couponAmount > 0 && (
+                    <div className="summary-item" style={{ color: '#059669', fontWeight: '700' }}>
+                      <span>Coupon ({couponCode}):</span>
+                      <span>-₹{pricing.couponAmount.toLocaleString('en-IN')}</span>
+                    </div>
+                  )}
+
+
 
                   <div className="form-actions">
                     <button

@@ -1,13 +1,14 @@
-import { useState, useMemo } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { useState } from 'react'
+import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { useCarContext } from '../context/CarContext'
 import SearchBar from '../components/SearchBar'
 import BookingModal from '../components/BookingModal'
 import ComparisonBar from '../components/ComparisonBar'
 import CompareModal from '../components/CompareModal'
-import { HiLocationMarker, HiBookmark, HiRefresh } from 'react-icons/hi'
+import { HiLocationMarker, HiBookmark } from 'react-icons/hi'
 import { MdWavingHand, MdCompareArrows } from 'react-icons/md'
+import { useAuth } from '../context/AuthContext'
 import './Home.css'
 
 const Home = () => {
@@ -26,10 +27,11 @@ const Home = () => {
     loading,
     error: contextError
   } = useCarContext()
+  const { isLoggedIn } = useAuth()
   const [selectedRental, setSelectedRental] = useState(null)
   const [showBookingModal, setShowBookingModal] = useState(false)
   const [showCompareModal, setShowCompareModal] = useState(false)
-  const [error, setError] = useState('')
+  const [error] = useState('')
 
   const carTypes = ['All', 'Hatchback', 'Sedan', 'SUV', 'Luxury']
 
@@ -177,7 +179,7 @@ const Home = () => {
                       </div>
 
                       <div className="rc-actions">
-                        {JSON.parse(localStorage.getItem('currentUser')) && (
+                        {isLoggedIn && (
                           <button
                             className={`btn-save-bookmark ${isCarSaved(car.id) ? 'saved' : ''}`}
                             onClick={(e) => {
