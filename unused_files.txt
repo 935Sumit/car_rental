@@ -1,5 +1,0 @@
-﻿UNUSED FILES:
-D:\INTERNSHIP\Vinatge Rides Hub\src\assets\Gemini_Generated_Image_afp0o3afp0o3afp0.png
-D:\INTERNSHIP\Vinatge Rides Hub\src\components\AvailabilityCalendar.jsx
-D:\INTERNSHIP\Vinatge Rides Hub\src\pages\RentCars.jsx
-D:\INTERNSHIP\Vinatge Rides Hub\src\scripts\uploadData.js
