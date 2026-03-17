@@ -3,7 +3,7 @@ import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { useCarContext } from '../context/CarContext'
 import SearchBar from '../components/SearchBar'
-import BookingModal from '../components/BookingModal'
+
 import ComparisonBar from '../components/ComparisonBar'
 import CompareModal from '../components/CompareModal'
 import { HiLocationMarker, HiBookmark } from 'react-icons/hi'
@@ -28,8 +28,6 @@ const Home = () => {
     error: contextError
   } = useCarContext()
   const { isLoggedIn } = useAuth()
-  const [selectedRental, setSelectedRental] = useState(null)
-  const [showBookingModal, setShowBookingModal] = useState(false)
   const [showCompareModal, setShowCompareModal] = useState(false)
   const [error] = useState('')
 
@@ -227,15 +225,7 @@ const Home = () => {
         </div>
       </section>
 
-      {showBookingModal && selectedRental && (
-        <BookingModal
-          rental={selectedRental}
-          onClose={() => {
-            setShowBookingModal(false)
-            setSelectedRental(null)
-          }}
-        />
-      )}
+
 
       <ComparisonBar onCompare={() => setShowCompareModal(true)} />
 
