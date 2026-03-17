@@ -1,5 +1,5 @@
 .home {
-  padding-top: 80px;
+  padding-top: 105px; /* Creates a 20px gap between 85px header and cards */
 }
 
 .hero {

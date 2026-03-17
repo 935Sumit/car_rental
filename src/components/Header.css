@@ -3,7 +3,7 @@
   top: 0;
   left: 0;
   right: 0;
-  height: 80px;
+  height: 85px; /* Decreased to prevent merging with content */
   background: rgba(88, 71, 56, 0.9);
   backdrop-filter: blur(12px);
   z-index: 1000;
@@ -51,9 +51,10 @@
 }
 
 .logo-image {
-  height: 64px;
-  width: 64px;
+  height: 75px;
+  width: auto;
   object-fit: contain;
+  mix-blend-mode: multiply;
 }
 
 .logo-text {

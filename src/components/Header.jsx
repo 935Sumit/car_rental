@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { motion } from 'framer-motion'
-import logo from '../assets/final logo.jpg.png'
+import logo from '../assets/premium_logo.png'
 import './Header.css'
 
 const Header = () => {
