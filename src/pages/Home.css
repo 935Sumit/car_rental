@@ -400,7 +400,51 @@
     margin: 0 auto;
   }
 
+  .hero {
+    padding: 80px 0 60px;
+  }
+
   .hero h1 {
     font-size: 2.8rem;
+  }
+
+  .hero p {
+    font-size: 1.1rem;
+    margin-bottom: 40px;
+  }
+
+  .filters-section {
+    padding: 24px 0 16px;
+  }
+
+  .filter-chip {
+    padding: 10px 18px;
+    font-size: 12px;
+  }
+
+  .rc-body {
+    padding: 20px;
+  }
+
+  .rc-actions {
+    flex-wrap: wrap;
+  }
+
+  .btn-book {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero h1 {
+    font-size: 2rem;
+  }
+
+  .hero p {
+    font-size: 1rem;
+  }
+
+  .rental-cards-grid {
+    max-width: 100%;
   }
 }

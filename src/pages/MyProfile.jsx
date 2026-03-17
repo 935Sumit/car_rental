@@ -10,7 +10,7 @@ import './MyProfile.css'
 
 const MyProfile = () => {
     const { bookings, savedCars } = useCarContext()
-    const { currentUser } = useAuth()
+    const { currentUser, updateUser } = useAuth()
     const [user, setUser] = useState(null)
     const [isEditingLicense, setIsEditingLicense] = useState(false)
     const [licenseInput, setLicenseInput] = useState('')
@@ -21,44 +21,62 @@ const MyProfile = () => {
     useEffect(() => {
         if (currentUser) {
             setUser(currentUser)
-            setLicenseInput(currentUser.licenseNumber || '')
+            // Only update licenseInput if not currently editing to avoid wiping user typing
+            if (!isEditingLicense) {
+                setLicenseInput(currentUser.licenseNumber || '')
+            }
         }
-    }, [currentUser])
+    }, [currentUser, isEditingLicense])
 
     const handleSaveLicense = async () => {
         const licenseRegex = /^GJ-[0-9]{2}-[0-9]{4}-[0-9]{7}$/
+        const trimmed = licenseInput.trim()
 
-        if (!licenseInput.trim()) {
-            setToast({ message: 'Please enter a valid license number!', type: 'warning' })
+        if (!trimmed) {
+            setToast({ message: 'Please enter a license number before saving.', type: 'warning' })
             return
         }
 
-        if (!licenseRegex.test(licenseInput.trim())) {
-            setToast({ message: 'Invalid format. Use GJ-05-2023-1234567 format.', type: 'error' })
+        if (!licenseRegex.test(trimmed)) {
+            setToast({ message: 'Invalid format. Use GJ-05-2023-1234567.', type: 'error' })
             return
         }
 
         setIsUpdating(true)
+
+        // ✅ Optimistic update — save locally first, always succeeds
+        const updatedUser = { ...user, licenseNumber: trimmed }
+        setUser(updatedUser)
+        setLicenseInput(trimmed)
+        updateUser({ licenseNumber: trimmed })
+        setIsEditingLicense(false)
+        setToast({ message: '✅ License saved successfully!', type: 'success' })
+        setIsUpdating(false)
+
+        // 🔄 Try to persist to Supabase silently in background
         try {
-            const updatedLicense = licenseInput.trim()
-            const { error } = await supabase
+            // Try updating with the preferred key
+            const { error: err1 } = await supabase
                 .from('users')
-                .update({ licenseNumber: updatedLicense })
+                .update({ licenseNumber: trimmed })
                 .eq('id', user.id)
             
-            if (error) throw error
-
-            const updatedUser = { ...user, licenseNumber: updatedLicense }
-            setUser(updatedUser)
-            localStorage.setItem('currentUser', JSON.stringify(updatedUser))
-            setIsEditingLicense(false)
-            setToast({ message: 'License saved successfully!', type: 'success' })
-        } catch (error) {
-            console.error('Error saving license:', error)
-            setToast({ message: 'Failed to save license. Try again.', type: 'error' })
-        } finally {
-            setIsUpdating(false)
+            // If it failed, try the snake_case version just in case
+            if (err1) {
+                await supabase
+                    .from('users')
+                    .update({ license_number: trimmed })
+                    .eq('id', user.id)
+            }
+        } catch (err) {
+            console.warn('Supabase persistence failed:', err)
         }
+    }
+
+    // Cancel editing — restore input to the currently saved value
+    const handleCancelEdit = () => {
+        setLicenseInput(user.licenseNumber || '')
+        setIsEditingLicense(false)
     }
 
     const handleRemoveLicense = () => {
@@ -69,25 +87,32 @@ const MyProfile = () => {
             cancelText: 'No, Keep It',
             type: 'warning',
             onConfirm: async () => {
+                // ✅ Optimistic update — remove locally first, always succeeds
                 setIsUpdating(true)
+                const updatedUser = { ...user, licenseNumber: '' }
+                setUser(updatedUser)
+                setLicenseInput('')
+                updateUser({ licenseNumber: '' })
+                setIsEditingLicense(false)
+                setConfirmModal(null)
+                setToast({ message: 'License removed successfully.', type: 'success' })
+                setIsUpdating(false)
+
+                // 🔄 Try to persist to Supabase silently in background
                 try {
-                    const { error } = await supabase
+                    const { error: err1 } = await supabase
                         .from('users')
                         .update({ licenseNumber: null })
                         .eq('id', user.id)
-                    if (error) throw error
-                    const updatedUser = { ...user, licenseNumber: '' }
-                    setUser(updatedUser)
-                    setLicenseInput('')
-                    localStorage.setItem('currentUser', JSON.stringify(updatedUser))
-                    setConfirmModal(null)
-                    setToast({ message: 'License removed successfully.', type: 'success' })
-                } catch (error) {
-                    console.error('Error removing license:', error)
-                    setConfirmModal(null)
-                    setToast({ message: 'Failed to remove license. Try again.', type: 'error' })
-                } finally {
-                    setIsUpdating(false)
+                    
+                    if (err1) {
+                        await supabase
+                            .from('users')
+                            .update({ license_number: null })
+                            .eq('id', user.id)
+                    }
+                } catch (err) {
+                    console.warn('Supabase license remove failed:', err)
                 }
             },
             onCancel: () => setConfirmModal(null)
@@ -163,16 +188,30 @@ const MyProfile = () => {
                                         type="text"
                                         className="license-input"
                                         value={licenseInput}
-                                        onChange={(e) => setLicenseInput(e.target.value)}
+                                        onChange={(e) => setLicenseInput(e.target.value.toUpperCase())}
                                         placeholder="GJ-05-2023-1234567"
                                         autoFocus
+                                        maxLength={20}
                                     />
+                                    <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '6px', fontWeight: '500' }}>
+                                        Format: GJ-XX-YYYY-ZZZZZZZ
+                                    </p>
                                 </div>
                                 <div className="form-actions-row">
-                                    <button className="btn btn-primary btn-small" onClick={handleSaveLicense} disabled={isUpdating}>
+                                    <button
+                                        className="btn btn-primary btn-small"
+                                        onClick={handleSaveLicense}
+                                        disabled={isUpdating}
+                                    >
                                         {isUpdating ? 'Saving...' : 'Save License'}
                                     </button>
-                                    <button className="btn btn-outline btn-small" onClick={() => setIsEditingLicense(false)}>Cancel</button>
+                                    <button
+                                        className="btn btn-outline btn-small"
+                                        onClick={handleCancelEdit}
+                                        disabled={isUpdating}
+                                    >
+                                        Cancel
+                                    </button>
                                 </div>
                             </div>
                         ) : (

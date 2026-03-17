@@ -61,7 +61,22 @@ export const CarProvider = ({ children }) => {
       if (error) {
         console.error("Supabase bookings error:", error)
       } else {
-        setBookings(data || [])
+        // 🔄 Recover lost extensions from localStorage if DB doesn't have the column yet
+        const recoveredData = (data || []).map(b => {
+          const localExt = localStorage.getItem(`ext_history_${b.id}`)
+          const localOrig = localStorage.getItem(`ext_orig_${b.id}`)
+          let updated = { ...b }
+          if (!b.extensions && localExt) {
+            try {
+              updated.extensions = JSON.parse(localExt)
+            } catch (e) { console.error('Failed to parse extension history', e) }
+          }
+          if (!b.originalEndDate && localOrig) {
+            updated.originalEndDate = localOrig
+          }
+          return updated
+        })
+        setBookings(recoveredData)
       }
     }
     fetchBookings()
@@ -89,7 +104,7 @@ export const CarProvider = ({ children }) => {
           .from('saved_cars')
           .select('*')
           .eq('user_id', currentUser.id)
-          
+
         if (error) {
           console.error('Supabase fetch error:', error)
           return
@@ -172,7 +187,7 @@ export const CarProvider = ({ children }) => {
         .from('bookings')
         .insert([newBooking])
         .select()
-      
+
       if (error) return { error }
 
       setBookings(prev => {
@@ -218,24 +233,102 @@ export const CarProvider = ({ children }) => {
     }
   }
 
-  const cancelBooking = (bookingId) => {
-    updateBookingStatus(bookingId, 'Cancelled')
+  const cancelBooking = async (bookingId) => {
+    // Optimistically remove from local state immediately
+    setBookings(prev => prev.filter(b => b.id !== bookingId))
+    // Then delete from Supabase in background
+    try {
+      await supabase
+        .from('bookings')
+        .delete()
+        .eq('id', bookingId)
+    } catch (e) {
+      console.warn('Supabase cancel/delete failed:', e)
+      // Don't revert — user expectation is that it's gone
+    }
   }
 
-  const extendBooking = async (bookingId, newEndDate, extraDays, extraPayment) => {
+  const extendBooking = async (bookingId, newEndDate, newExtension) => {
     try {
+      const currentBooking = bookings.find(b => b.id === bookingId)
+      if (!currentBooking) throw new Error('Booking not found')
+
+      const existingExtensions = currentBooking.extensions || []
+      const updatedExtensions = [...existingExtensions, newExtension]
+
+      const originalEndDate = currentBooking.originalEndDate || currentBooking.endDate
+
+      // 💾 Save original end date to localStorage forever if it's the first extension
+      if (!currentBooking.originalEndDate) {
+        localStorage.setItem(`ext_orig_${bookingId}`, originalEndDate)
+      }
+
       const { error } = await supabase
         .from('bookings')
-        .update({ endDate: newEndDate, status: 'Extended' })
+        .update({
+          endDate: newEndDate,
+          status: 'Extended',
+          originalEndDate: originalEndDate,
+          extensions: updatedExtensions,
+        })
         .eq('id', bookingId)
+
       if (error) throw error
+
+      // 💾 Save to localStorage backup (survives DB column missing)
+      localStorage.setItem(`ext_history_${bookingId}`, JSON.stringify(updatedExtensions))
+
       setBookings(prev => prev.map(b =>
         b.id === bookingId
-          ? { ...b, endDate: newEndDate, status: 'Extended' }
+          ? { ...b, endDate: newEndDate, status: 'Extended', originalEndDate, extensions: updatedExtensions }
           : b
       ))
     } catch (e) {
       console.error("Error extending booking:", e)
+      throw e
+    }
+  }
+
+  const cancelExtension = async (bookingId, extensionIndex) => {
+    try {
+      const currentBooking = bookings.find(b => b.id === bookingId)
+      if (!currentBooking) throw new Error('Booking not found')
+
+      const existingExtensions = currentBooking.extensions || []
+      const updatedExtensions = existingExtensions.filter((_, i) => i !== extensionIndex)
+
+      let newEndDate
+      let newStatus
+
+      if (updatedExtensions.length === 0) {
+        newEndDate = currentBooking.originalEndDate || currentBooking.endDate
+        newStatus = 'Active'
+      } else {
+        newEndDate = updatedExtensions[updatedExtensions.length - 1].toDate
+        newStatus = 'Extended'
+      }
+
+      const { error } = await supabase
+        .from('bookings')
+        .update({
+          endDate: newEndDate,
+          status: newStatus,
+          extensions: updatedExtensions,
+        })
+        .eq('id', bookingId)
+
+      if (error) throw error
+
+      // 💾 Update localStorage backup
+      localStorage.setItem(`ext_history_${bookingId}`, JSON.stringify(updatedExtensions))
+
+      setBookings(prev => prev.map(b =>
+        b.id === bookingId
+          ? { ...b, endDate: newEndDate, status: newStatus, extensions: updatedExtensions }
+          : b
+      ))
+    } catch (e) {
+      console.error("Error cancelling extension:", e)
       throw e
     }
   }
@@ -255,7 +348,7 @@ export const CarProvider = ({ children }) => {
           .delete()
           .eq('user_id', currentUser.id)
           .eq('car_id', String(car.id))
-          
+
         if (error) {
           console.error('Supabase error removing car:', error)
           // Revert optimistic update
@@ -275,7 +368,7 @@ export const CarProvider = ({ children }) => {
             car_id: String(car.id),
             car_data: car
           }])
-          
+
         if (error) {
           console.error('Supabase error saving car:', error)
           // Revert optimistic update
@@ -327,6 +420,7 @@ export const CarProvider = ({ children }) => {
     deleteBooking,
     cancelBooking,
     extendBooking,
+    cancelExtension,
     savedCars,
     setSavedCars,
     compareList,

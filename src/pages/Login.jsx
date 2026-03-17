@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { supabase } from '../supabase/supabaseClient'
 import { useAuth } from '../context/AuthContext'
+import { HiEye, HiEyeOff } from 'react-icons/hi'
 import './Auth.css'
 
 const Login = () => {
@@ -13,6 +14,7 @@ const Login = () => {
     password: '',
     rememberMe: false
   })
+  const [showPassword, setShowPassword] = useState(false)
   const [errors, setErrors] = useState({})
   const [isLoading, setIsLoading] = useState(false)
 
@@ -59,7 +61,7 @@ const Login = () => {
         return
       }
 
-      login(userData)
+      await login(userData)
 
       // Record successful login
       await supabase.from('login_logs').insert([{
@@ -118,7 +120,23 @@ const Login = () => {
             </div>
             <div className="form-group">
               <label>Password</label>
-              <input type="password" name="password" value={formData.password} onChange={handleChange} placeholder="Enter your password" className={errors.password ? 'error' : ''} />
+              <div className="password-wrapper">
+                <input 
+                  type={showPassword ? "text" : "password"} 
+                  name="password" 
+                  value={formData.password} 
+                  onChange={handleChange} 
+                  placeholder="Enter your password" 
+                  className={errors.password ? 'error' : ''} 
+                />
+                <button 
+                  type="button" 
+                  className="password-toggle-btn"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <HiEyeOff /> : <HiEye />}
+                </button>
+              </div>
               {errors.password && <span className="error-message">{errors.password}</span>}
             </div>
             <div className="form-options">

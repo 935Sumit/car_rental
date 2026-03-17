@@ -78,6 +78,7 @@
     box-shadow: 0 10px 30px rgba(88, 71, 56, 0.06);
     border: 1px solid var(--accent-color);
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
 }
 
 .booking-card-redesign:hover {
@@ -189,9 +190,40 @@
 }
 
 .btn-action:hover {
-    background: var(--primary-dark);
     transform: translateY(-2px);
     box-shadow: 0 6px 15px rgba(88, 71, 56, 0.2);
+}
+
+/* Extend button — primary brown */
+.btn-action.btn-extend {
+    background: var(--primary-color);
+}
+
+.btn-action.btn-extend:hover {
+    background: var(--primary-dark);
+    box-shadow: 0 6px 15px rgba(88, 71, 56, 0.3);
+}
+
+/* Download Invoice button */
+.btn-action.btn-download-invoice {
+    background: var(--secondary-color);
+}
+
+.btn-action.btn-download-invoice:hover {
+    background: var(--secondary-dark);
+    box-shadow: 0 6px 15px rgba(181, 158, 125, 0.3);
+}
+
+/* Cancel button — red */
+.btn-action.btn-cancel {
+    background: #b85c5c;
+    color: #fff;
+}
+
+.btn-action.btn-cancel:hover {
+    background: #9e3d3d;
+    box-shadow: 0 6px 15px rgba(184, 92, 92, 0.35);
+    transform: translateY(-2px);
 }
 
 .btn-action svg {
@@ -200,17 +232,18 @@
 
 .extended-badge {
     position: absolute;
-    top: 15px;
-    right: 15px;
+    top: 20px;
+    right: 20px;
     background: var(--secondary-color);
     color: #fff;
-    padding: 6px 14px;
+    padding: 8px 18px;
     border-radius: 50px;
-    font-size: 0.7rem;
+    font-size: 0.8rem;
     font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 1px;
-    box-shadow: 0 4px 12px rgba(181, 158, 125, 0.2);
+    letter-spacing: 1.5px;
+    box-shadow: 0 4px 15px rgba(181, 158, 125, 0.3);
+    z-index: 10;
 }
 
 .extension-details {
@@ -239,5 +272,49 @@
     .booking-image {
         width: 100%;
         height: 200px;
+        min-width: unset;
+    }
+
+    .booking-details {
+        padding: 20px;
+    }
+
+    .page-header h1 {
+        font-size: 2.5rem;
+    }
+
+    .booking-actions {
+        flex-wrap: wrap;
+    }
+
+    .btn-action {
+        min-width: unset;
+        flex: 1;
+    }
+}
+
+@media (max-width: 480px) {
+    .page-header h1 {
+        font-size: 2rem;
+    }
+
+    .page-header p {
+        font-size: 1rem;
+    }
+
+    .car-name {
+        font-size: 1.4rem;
+    }
+
+    .info-value.price {
+        font-size: 1.1rem;
+    }
+
+    .booking-actions {
+        flex-direction: column;
+    }
+
+    .btn-action {
+        width: 100%;
     }
 }

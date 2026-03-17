@@ -24,7 +24,7 @@ const Dashboard = () => {
                 .from('login_logs')
                 .select('*')
                 .order('created_at', { ascending: false })
-                .limit(10)
+                .limit(5)
             if (!error) setLoginLogs(data || [])
         }
         fetchLoginLogs()

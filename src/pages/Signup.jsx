@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { supabase } from '../supabase/supabaseClient'
 import { useAuth } from '../context/AuthContext'
+import { HiEye, HiEyeOff } from 'react-icons/hi'
 import './Auth.css'
 
 const Signup = () => {
@@ -16,6 +17,8 @@ const Signup = () => {
     confirmPassword: '',
     agreeToTerms: false
   })
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [errors, setErrors] = useState({})
   const [isLoading, setIsLoading] = useState(false)
 
@@ -80,7 +83,7 @@ const Signup = () => {
       if (dbError) throw dbError
 
       // 4. Auto-Login
-      login(newUser || {
+      await login(newUser || {
         id: newId,
         fullName: formData.fullName,
         email: formData.email,
@@ -135,12 +138,44 @@ const Signup = () => {
             </div>
             <div className="form-group">
               <label>Password</label>
-              <input type="password" name="password" value={formData.password} onChange={handleChange} placeholder="Create a strong password" className={errors.password ? 'error' : ''} />
+              <div className="password-wrapper">
+                <input 
+                  type={showPassword ? "text" : "password"} 
+                  name="password" 
+                  value={formData.password} 
+                  onChange={handleChange} 
+                  placeholder="Create a strong password" 
+                  className={errors.password ? 'error' : ''} 
+                />
+                <button 
+                  type="button" 
+                  className="password-toggle-btn"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <HiEyeOff /> : <HiEye />}
+                </button>
+              </div>
               {errors.password && <span className="error-message">{errors.password}</span>}
             </div>
             <div className="form-group">
               <label>Confirm Password</label>
-              <input type="password" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} placeholder="Re-enter your password" />
+              <div className="password-wrapper">
+                <input 
+                  type={showConfirmPassword ? "text" : "password"} 
+                  name="confirmPassword" 
+                  value={formData.confirmPassword} 
+                  onChange={handleChange} 
+                  placeholder="Re-enter your password" 
+                  className={errors.confirmPassword ? 'error' : ''}
+                />
+                <button 
+                  type="button" 
+                  className="password-toggle-btn"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                >
+                  {showConfirmPassword ? <HiEyeOff /> : <HiEye />}
+                </button>
+              </div>
               {errors.confirmPassword && <span className="error-message">{errors.confirmPassword}</span>}
             </div>
             <div className="form-group">

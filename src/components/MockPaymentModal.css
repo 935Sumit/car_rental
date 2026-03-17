@@ -296,3 +296,23 @@
     font-weight: 800;
     color: var(--primary-color);
 }
+
+@media (max-width: 480px) {
+    .mock-payment-card {
+        border-radius: 16px 16px 0 0;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .mock-form .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .mock-payment-body {
+        padding: 20px;
+    }
+
+    .amount-display .value {
+        font-size: 1.8rem;
+    }
+}

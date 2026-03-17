@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react'
+import { supabase } from '../supabase/supabaseClient'
 
 const AuthContext = createContext()
 
@@ -25,12 +26,39 @@ export const AuthProvider = ({ children }) => {
     setAuthLoading(false)
   }, [])
 
-  const login = (userData) => {
-    localStorage.setItem('currentUser', JSON.stringify(userData))
-    if (userData.role === 'admin') {
+  const login = async (userData) => {
+    // 🔍 Smart License Recovery
+    let license = userData.licenseNumber || userData.license_number
+    
+    // Fallback 1: LocalStorage backup (survives logout)
+    if (!license) {
+      license = localStorage.getItem(`lic_backup_${userData.email}`)
+    }
+
+    // Fallback 2: Check latest booking (database backup)
+    if (!license && userData.id) {
+       try {
+         const { data } = await supabase
+           .from('bookings')
+           .select('licenseNumber')
+           .eq('userEmail', userData.email)
+           .order('id', { ascending: false })
+           .limit(1)
+         if (data?.[0]?.licenseNumber) {
+           license = data[0].licenseNumber
+           // Update backup
+           localStorage.setItem(`lic_backup_${userData.email}`, license)
+         }
+       } catch (e) { console.warn('Booking backup lookup failed:', e) }
+    }
+
+    const finalUser = { ...userData, licenseNumber: license }
+
+    localStorage.setItem('currentUser', JSON.stringify(finalUser))
+    if (finalUser.role === 'admin') {
       localStorage.setItem('adminLoggedIn', 'true')
     }
-    setCurrentUser(userData)
+    setCurrentUser(finalUser)
     // Trigger storage event so CarContext reloads saved cars
     window.dispatchEvent(new Event('storage'))
   }
@@ -44,11 +72,24 @@ export const AuthProvider = ({ children }) => {
   const isAdmin = currentUser?.role === 'admin'
   const isLoggedIn = !!currentUser
 
+  const updateUser = (updatedData) => {
+    const merged = { ...currentUser, ...updatedData }
+    
+    // Update license backup if changed
+    if (updatedData.licenseNumber && merged.email) {
+      localStorage.setItem(`lic_backup_${merged.email}`, updatedData.licenseNumber)
+    }
+
+    localStorage.setItem('currentUser', JSON.stringify(merged))
+    setCurrentUser(merged)
+  }
+
   return (
     <AuthContext.Provider value={{
       currentUser,
       login,
       logout,
+      updateUser,
       isAdmin,
       isLoggedIn,
       authLoading

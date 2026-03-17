@@ -609,6 +609,28 @@
 }
 
 @media (max-width: 768px) {
+  .modal-overlay {
+    padding: 12px;
+    align-items: flex-end;
+  }
+
+  .modal-content {
+    border-radius: 20px 20px 0 0;
+    max-height: 95vh;
+  }
+
+  .modal-header {
+    padding: 20px 24px;
+  }
+
+  .modal-header h2 {
+    font-size: 22px;
+  }
+
+  .booking-form {
+    padding: 20px 24px;
+  }
+
   .form-row {
     grid-template-columns: 1fr;
   }
@@ -619,5 +641,35 @@
 
   .form-actions .btn {
     width: 100%;
+  }
+
+  .payment-options {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .drive-type-options {
+    grid-template-columns: 1fr;
+  }
+
+  .receipt-grid {
+    grid-template-columns: 1fr;
+    padding: 16px;
+    gap: 16px;
+  }
+
+  .submission-success.premium-receipt {
+    padding: 20px;
+  }
+
+  .receipt-ticket-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 12px 16px;
+  }
+
+  .summary-total {
+    font-size: 18px;
   }
 }

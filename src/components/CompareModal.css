@@ -180,10 +180,22 @@
 
 @media (max-width: 768px) {
     .compare-content {
-        padding: 20px;
+        padding: 16px;
+    }
+
+    .compare-header {
+        padding: 16px 20px;
+    }
+
+    .compare-header h2 {
+        font-size: 1.5rem;
     }
 
     .compare-table {
-        min-width: 600px;
+        min-width: 480px;
+    }
+
+    .labels-col {
+        min-width: 110px;
     }
 }

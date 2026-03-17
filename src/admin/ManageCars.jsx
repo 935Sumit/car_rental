@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useCarContext } from '../context/CarContext'
 import { supabase } from '../supabase/supabaseClient'
+import { HiSearch, HiX } from 'react-icons/hi'
 import './Dashboard.css'
 import './ManageCars.css'
 
@@ -10,6 +11,7 @@ const ManageCars = () => {
     const [showModal, setShowModal] = useState(false)
     const [isEditing, setIsEditing] = useState(false)
     const [currentCarId, setCurrentCarId] = useState(null)
+    const [searchQuery, setSearchQuery] = useState('')
     
     const [formData, setFormData] = useState({
         name: '',
@@ -146,6 +148,17 @@ const ManageCars = () => {
         setCurrentCarId(null)
     }
 
+    const q = searchQuery.toLowerCase()
+    const filteredCars = rentals.filter(car =>
+        !q ||
+        car.name?.toLowerCase().includes(q) ||
+        car.brand?.toLowerCase().includes(q) ||
+        car.fuel?.toLowerCase().includes(q) ||
+        car.city?.toLowerCase().includes(q) ||
+        car.type?.toLowerCase().includes(q) ||
+        car.status?.toLowerCase().includes(q)
+    )
+
     return (
         <div className="admin-dashboard">
             <main className="admin-content">
@@ -162,6 +175,26 @@ const ManageCars = () => {
                         </div>
                     </header>
 
+                    {/* ── Search Bar ── */}
+                    <div className="admin-search-bar">
+                        <HiSearch className="admin-search-icon" />
+                        <input
+                            type="text"
+                            placeholder="Search by car name, brand, fuel or city..."
+                            value={searchQuery}
+                            onChange={e => setSearchQuery(e.target.value)}
+                            className="admin-search-input"
+                        />
+                        {searchQuery && (
+                            <button className="admin-search-clear" onClick={() => setSearchQuery('')}>
+                                <HiX />
+                            </button>
+                        )}
+                        <span className="admin-search-count">
+                            {filteredCars.length} / {rentals.length} cars
+                        </span>
+                    </div>
+
                     <div className="admin-table-container fade-in-up">
                         <table className="admin-table">
                             <thead>
@@ -177,10 +210,12 @@ const ManageCars = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {rentals.length === 0 ? (
-                                    <tr><td colSpan="8" style={{ textAlign: 'center' }}>No cars found.</td></tr>
+                                {filteredCars.length === 0 ? (
+                                    <tr><td colSpan="8" style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)' }}>
+                                        {searchQuery ? `No cars found matching "${searchQuery}"` : 'No cars found.'}
+                                    </td></tr>
                                 ) : (
-                                    rentals.map(car => (
+                                    filteredCars.map(car => (
                                         <tr key={car.id}>
                                             <td><img src={car.image} alt={car.name} className="car-thumb" /></td>
                                             <td>{car.name}</td>

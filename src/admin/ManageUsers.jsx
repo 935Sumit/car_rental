@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../supabase/supabaseClient'
+import { HiSearch, HiX } from 'react-icons/hi'
 import './Dashboard.css'
 import './ManageCars.css'
 import './ManageBookings.css'
@@ -11,6 +12,8 @@ const ManageUsers = () => {
     const [loading, setLoading] = useState(true)
     const [toast, setToast] = useState(null)
     const [confirmModal, setConfirmModal] = useState(null)
+    const [searchQuery, setSearchQuery] = useState('')
+    const [statusFilter, setStatusFilter] = useState('All')
 
     useEffect(() => {
         fetchUsers()
@@ -23,7 +26,6 @@ const ManageUsers = () => {
                 .from('users')
                 .select('*')
                 .order('created_at', { ascending: false })
-            
             if (error) throw error
             setUsers(data || [])
         } catch (error) {
@@ -41,10 +43,8 @@ const ManageUsers = () => {
                 .from('users')
                 .update({ status: newStatus })
                 .eq('id', id)
-            
             if (error) throw error
-            
-            setUsers(users.map(user => 
+            setUsers(users.map(user =>
                 user.id === id ? { ...user, status: newStatus } : user
             ))
         } catch (error) {
@@ -80,6 +80,22 @@ const ManageUsers = () => {
         })
     }
 
+    const q = searchQuery.toLowerCase()
+    const filteredUsers = users.filter(user => {
+        const matchesSearch = !q ||
+            user.fullName?.toLowerCase().includes(q) ||
+            user.email?.toLowerCase().includes(q) ||
+            user.phone?.toLowerCase().includes(q) ||
+            user.role?.toLowerCase().includes(q)
+        const matchesStatus =
+            statusFilter === 'All' ||
+            (statusFilter === 'Active' && user.status !== 'blocked') ||
+            (statusFilter === 'Blocked' && user.status === 'blocked')
+        return matchesSearch && matchesStatus
+    })
+
+    const statusTabs = ['All', 'Active', 'Blocked']
+
     return (
         <div className="admin-dashboard">
             <main className="admin-content">
@@ -94,6 +110,47 @@ const ManageUsers = () => {
                         </button>
                     </header>
 
+                    {/* ── Search Bar + Status Tabs ── */}
+                    <div style={{ display: 'flex', gap: '16px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '20px' }}>
+                        <div className="admin-search-bar" style={{ flex: 1, minWidth: '260px' }}>
+                            <HiSearch className="admin-search-icon" />
+                            <input
+                                type="text"
+                                placeholder="Search by name, email or phone..."
+                                value={searchQuery}
+                                onChange={e => setSearchQuery(e.target.value)}
+                                className="admin-search-input"
+                            />
+                            {searchQuery && (
+                                <button className="admin-search-clear" onClick={() => setSearchQuery('')}>
+                                    <HiX />
+                                </button>
+                            )}
+                            <span className="admin-search-count">
+                                {filteredUsers.length} / {users.length} users
+                            </span>
+                        </div>
+                        <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
+                            {statusTabs.map(tab => (
+                                <button
+                                    key={tab}
+                                    onClick={() => setStatusFilter(tab)}
+                                    style={{
+                                        padding: '9px 18px',
+                                        borderRadius: '100px',
+                                        border: statusFilter === tab ? '2px solid var(--primary-color)' : '2px solid #e5e7eb',
+                                        background: statusFilter === tab ? 'var(--primary-color)' : '#fff',
+                                        color: statusFilter === tab ? '#fff' : '#4b5563',
+                                        fontWeight: '700', fontSize: '13px', cursor: 'pointer',
+                                        transition: 'all 0.2s ease'
+                                    }}
+                                >
+                                    {tab}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
                     <div className="admin-table-container fade-in-up">
                         <table className="admin-table">
                             <thead>
@@ -107,28 +164,24 @@ const ManageUsers = () => {
                             </thead>
                             <tbody>
                                 {loading ? (
-                                    <tr><td colSpan="5" style={{ textAlign: 'center' }}>Loading users...</td></tr>
-                                ) : users.length === 0 ? (
-                                    <tr><td colSpan="5" style={{ textAlign: 'center' }}>No users found.</td></tr>
+                                    <tr><td colSpan="5" style={{ textAlign: 'center', padding: '40px' }}>Loading users...</td></tr>
+                                ) : filteredUsers.length === 0 ? (
+                                    <tr><td colSpan="5" style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)' }}>
+                                        {searchQuery ? `No users found matching "${searchQuery}"` : 'No users found.'}
+                                    </td></tr>
                                 ) : (
-                                    users.map((user) => (
+                                    filteredUsers.map((user) => (
                                         <tr key={user.id}>
                                             <td style={{ fontWeight: '700', color: 'var(--primary-color)' }}>{user.fullName}</td>
                                             <td>{user.email}</td>
                                             <td style={{ fontStyle: 'italic' }}>{user.phone || 'N/A'}</td>
                                             <td>
                                                 <span className={`status-badge ${user.status === 'blocked' ? 'status-cancelled' : 'status-approved'}`}>
-                                                    {user.status || 'Active'}
+                                                    {user.status === 'blocked' ? 'Blocked' : 'Active'}
                                                 </span>
                                             </td>
                                             <td className="actions-cell">
                                                 <div className="action-btns-row">
-                                                    <button 
-                                                        className="btn-edit" 
-                                                        onClick={() => setToast({ message: `${user.fullName} • ${user.email} • ${user.phone || 'N/A'}`, type: 'info' })}
-                                                    >
-                                                        View
-                                                    </button>
                                                     <button 
                                                         className={`btn-cancel ${user.status === 'blocked' ? 'btn-approve' : ''}`} 
                                                         onClick={() => handleBlockUser(user.id, user.status)}

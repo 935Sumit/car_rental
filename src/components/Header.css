@@ -133,16 +133,30 @@
   display: none;
 }
 
+/* Mobile menu overlay backdrop */
+.mobile-menu-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 999;
+}
+
+.mobile-menu-overlay.open {
+  display: block;
+}
+
 @media (max-width: 968px) {
   .mobile-menu-toggle {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 5px;
     background: transparent;
     border: none;
     cursor: pointer;
     padding: 10px;
-    z-index: 1001;
+    z-index: 1002;
+    margin-left: auto;
   }
 
   .mobile-menu-toggle span {
@@ -153,6 +167,11 @@
     transition: all 0.3s ease;
   }
 
+  /* When header is scrolled, hamburger bars go dark */
+  .header.scrolled .mobile-menu-toggle span {
+    background: var(--primary-color);
+  }
+
   .nav {
     position: fixed;
     top: 0;
@@ -161,13 +180,46 @@
     height: 100vh;
     background: var(--bg-dark);
     flex-direction: column;
-    padding: 100px 30px;
-    transition: all 0.4s ease;
+    align-items: flex-start;
+    padding: 100px 30px 40px;
+    gap: 6px;
+    transition: right 0.4s ease;
     border-radius: 0;
     margin: 0;
+    z-index: 1001;
+    overflow-y: auto;
   }
 
   .nav.open {
     right: 0;
+  }
+
+  /* Inside mobile menu: make links full-width and nicely spaced */
+  .nav .nav-link {
+    width: 100%;
+    padding: 12px 18px;
+    font-size: 12px;
+    border-radius: 8px;
+    color: var(--accent-light);
+  }
+
+  .nav .logout-btn {
+    width: 100%;
+    padding: 12px 18px;
+    border-radius: 8px;
+    margin-top: 10px;
+    font-size: 11px;
+  }
+
+  /* Hide auth-links in desktop form; they show inside the slide-out nav */
+  .auth-links {
+    display: none;
+  }
+
+  /* Logo text: hide on very small phones */
+  @media (max-width: 380px) {
+    .logo-text {
+      display: none;
+    }
   }
 }

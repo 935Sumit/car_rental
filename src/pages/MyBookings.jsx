@@ -12,7 +12,7 @@ import { downloadInvoice } from '../utils/invoiceGenerator'
 import './MyBookings.css'
 
 const MyBookings = () => {
-    const { bookings, cancelBooking, rentals } = useCarContext()
+    const { bookings, cancelBooking, cancelExtension, rentals, loading } = useCarContext()
     const { currentUser } = useAuth()
     const [cancelMessage] = useState('')
     const [extendingBooking, setExtendingBooking] = useState(null)
@@ -21,12 +21,15 @@ const MyBookings = () => {
     const [searchQuery, setSearchQuery] = useState('')
     const [statusFilter, setStatusFilter] = useState('All')
 
-    const statusTabs = ['All', 'Active', 'Extended', 'Cancelled']
+    const statusTabs = ['All', 'Active', 'Extended']
 
-    const allUserBookings = useMemo(() =>
-        bookings.filter(b => b.userEmail === currentUser?.email),
-        [bookings, currentUser]
-    )
+    const allUserBookings = useMemo(() => {
+        if (!currentUser?.email) return []
+        return (bookings || []).filter(b => 
+            b.userEmail === currentUser.email || 
+            b.user_email === currentUser.email
+        )
+    }, [bookings, currentUser])
 
     const userBookings = useMemo(() => {
         return allUserBookings.filter(b => {
@@ -35,7 +38,7 @@ const MyBookings = () => {
                 b.carName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 b.id?.toString().toLowerCase().includes(searchQuery.toLowerCase())
             return matchesStatus && matchesSearch
-        })
+        }) || []
     }, [allUserBookings, statusFilter, searchQuery])
 
     const handleCancel = (bookingId) => {
@@ -54,7 +57,30 @@ const MyBookings = () => {
         })
     }
 
+    const handleCancelExtension = (booking, extIndex) => {
+        const ext = booking.extensions[extIndex]
+        setConfirmModal({
+            message: `Cancel Extension #${ext.extensionNumber}?`,
+            subMessage: `This will remove the +${ext.extraDays} day extension and revert the end date.`,
+            confirmText: 'Yes, Cancel Extension',
+            cancelText: 'No, Keep It',
+            type: 'danger',
+            onConfirm: () => {
+                cancelExtension(booking.id, extIndex)
+                setConfirmModal(null)
+                setToast({ message: `Extension #${ext.extensionNumber} cancelled!`, type: 'success' })
+            },
+            onCancel: () => setConfirmModal(null)
+        })
+    }
 
+    if (loading) {
+        return (
+            <div className="my-bookings-page" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+                <div className="loader">Loading your bookings...</div>
+            </div>
+        )
+    }
 
     return (
         <div className="my-bookings-page">
@@ -81,10 +107,7 @@ const MyBookings = () => {
                         maxWidth: '650px',
                         width: '100%',
                         boxShadow: '0 4px 20px -4px rgba(0,0,0,0.05)',
-                        transition: 'border-color 0.2s ease, box-shadow 0.2s ease'
-                    }}
-                    className="search-bar-container-enhanced"
-                    >
+                    }}>
                         <HiSearch style={{ color: 'var(--primary-color)', fontSize: '24px', flexShrink: 0 }} />
                         <input
                             type="text"
@@ -131,10 +154,10 @@ const MyBookings = () => {
                         flexWrap: 'wrap'
                     }}>
                         {statusTabs.map(tab => {
-                            const isActive = statusFilter === tab;
+                            const isActive = statusFilter === tab
                             const count = tab === 'All'
                                 ? allUserBookings.length
-                                : allUserBookings.filter(b => b.status === tab).length;
+                                : allUserBookings.filter(b => b.status === tab).length
 
                             return (
                                 <button
@@ -146,14 +169,14 @@ const MyBookings = () => {
                                         gap: '8px',
                                         padding: '10px 24px',
                                         borderRadius: '100px',
-                                        border: isActive ? '2px solid var(--primary-color, #5c3d1e)' : '2px solid #e5e7eb',
-                                        background: isActive ? 'var(--primary-color, #5c3d1e)' : '#fff',
+                                        border: isActive ? '2px solid var(--primary-color)' : '2px solid #e5e7eb',
+                                        background: isActive ? 'var(--primary-color)' : '#fff',
                                         color: isActive ? '#fff' : '#4b5563',
                                         fontWeight: isActive ? '700' : '600',
                                         fontSize: '14px',
                                         cursor: 'pointer',
-                                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                                        boxShadow: isActive ? '0 8px 16px -4px rgba(92, 61, 30, 0.3)' : '0 2px 8px rgba(0,0,0,0.04)'
+                                        transition: 'all 0.3s ease',
+                                        boxShadow: isActive ? '0 8px 16px -4px rgba(92,61,30,0.3)' : '0 2px 8px rgba(0,0,0,0.04)'
                                     }}
                                 >
                                     {tab}
@@ -172,14 +195,8 @@ const MyBookings = () => {
                         })}
                     </div>
 
-                    {/* Results count */}
-                    <p style={{
-                        marginTop: '16px',
-                        fontSize: '14px',
-                        color: '#6b7280',
-                        fontWeight: '500'
-                    }}>
-                        Showing <strong style={{color: '#111827'}}>{userBookings.length}</strong> of <strong style={{color: '#111827'}}>{allUserBookings.length}</strong> bookings
+                    <p style={{ marginTop: '16px', fontSize: '14px', color: '#6b7280', fontWeight: '500' }}>
+                        Showing <strong style={{ color: '#111827' }}>{userBookings.length}</strong> of <strong style={{ color: '#111827' }}>{allUserBookings.length}</strong> bookings
                     </p>
                 </header>
 
@@ -191,7 +208,7 @@ const MyBookings = () => {
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -20 }}
                         >
-                            <HiCheckCircle className="success-check" /> {cancelMessage}
+                            ✅ {cancelMessage}
                         </motion.div>
                     )}
                 </AnimatePresence>
@@ -216,11 +233,28 @@ const MyBookings = () => {
                         animate={{ opacity: 1 }}
                     >
                         {userBookings.map(booking => {
-                            const car = rentals.find(r => r.id === booking.carId)
+                            if (!booking) return null
+                            const car = (rentals || []).find(r => r.id === booking.carId)
                             const displayImage = car?.image || booking.carImage || 'https://via.placeholder.com/300x200?text=Car'
+                            const extensions = Array.isArray(booking.extensions) ? booking.extensions : []
+                            const totalExtraDays = extensions.reduce((sum, e) => sum + (Number(e.extraDays) || 0), 0)
+                            const totalBalance = extensions.reduce((sum, e) => sum + (Number(e.remainingPayment) || 0), 0)
 
                             return (
-                                <motion.div key={booking.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }} className="booking-card-redesign">
+                                <motion.div
+                                    key={booking.id}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.3 }}
+                                    className="booking-card-redesign"
+                                    style={{ position: 'relative' }}
+                                >
+                                    {booking.status === 'Extended' && (
+                                        <div className="extended-badge">
+                                            Extended {extensions.length > 1 ? `×${extensions.length}` : ''}
+                                        </div>
+                                    )}
+
                                     <div className="booking-image">
                                         <img
                                             src={displayImage}
@@ -230,40 +264,116 @@ const MyBookings = () => {
                                                 e.target.onerror = null
                                             }}
                                         />
-                                        {booking.status === 'Extended' && (
-                                            <div className="extended-badge">Extended</div>
-                                        )}
                                     </div>
+
                                     <div className="booking-details">
                                         <h3 className="car-name">{booking.carName}</h3>
                                         <div className="rc-specs" style={{ marginBottom: '15px' }}>
                                             {(car?.fuel || booking.fuel) && <span>{car?.fuel || booking.fuel}</span>}
-                                            {(car?.fuel || booking.fuel) && (car?.transmission || booking.transmission || car?.seats || booking.seats) && <span className="separator">•</span>}
+                                            {(car?.fuel || booking.fuel) && (car?.transmission || booking.transmission) && <span className="separator">•</span>}
                                             {(car?.transmission || booking.transmission) && <span>{car?.transmission || booking.transmission}</span>}
                                             {(car?.transmission || booking.transmission) && (car?.seats || booking.seats) && <span className="separator">•</span>}
                                             {(car?.seats || booking.seats) && <span>{car?.seats || booking.seats} Seater</span>}
                                         </div>
+
+                                        {/* Booking Dates */}
                                         <div className="booking-info-row">
-                                            <span className="info-label">Dates:</span>
-                                            <span className="info-value">{booking.startDate} to {booking.endDate}</span>
+                                            <span className="info-label">Original Dates:</span>
+                                            <span className="info-value">
+                                                {booking.startDate} → {booking.originalEndDate || (extensions.length > 0 ? extensions[0].fromDate : booking.endDate)}
+                                            </span>
                                         </div>
+
+                                        {booking.status === 'Extended' && (
+                                            <div className="booking-info-row">
+                                                <span className="info-label">Current End Date:</span>
+                                                <span className="info-value" style={{ color: '#2563eb', fontWeight: '800' }}>
+                                                    {booking.endDate}
+                                                </span>
+                                            </div>
+                                        )}
 
                                         {booking.driveType && (
                                             <div className="booking-info-row">
                                                 <span className="info-label">Drive Type:</span>
-                                                <span className="info-value highlight-blue">{booking.driveType}</span>
+                                                <span className="info-value highlight-blue" style={{ textTransform: 'capitalize' }}>
+                                                    {booking.driveType.replace('_', ' ')}
+                                                </span>
                                             </div>
                                         )}
 
-                                        {booking.status === 'Extended' && (
+                                        {/* ✅ EXTENSIONS SECTION - Shows each extension separately */}
+                                        {extensions.length > 0 && (
                                             <div className="extension-details">
-                                                <div className="booking-info-row">
-                                                    <span className="info-label">Extension:</span>
-                                                    <span className="info-value">+{booking.extraDays} days</span>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                                                    <HiCalendar style={{ color: 'var(--secondary-color)' }} />
+                                                    <h4 style={{ margin: 0, fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--secondary-color)' }}>
+                                                        Extension History ({extensions.length})
+                                                    </h4>
                                                 </div>
-                                                <div className="booking-info-row">
-                                                    <span className="info-label">Remaining:</span>
-                                                    <span className="info-value highlight">₹{booking.remainingPayment?.toLocaleString('en-IN')} (Pay at return)</span>
+
+                                                {/* Each Extension Row */}
+                                                {extensions.map((ext, index) => (
+                                                    <div key={index} style={{
+                                                        background: '#fff',
+                                                        borderRadius: '10px',
+                                                        padding: '10px 14px',
+                                                        marginBottom: '8px',
+                                                        border: '1px solid #e5e7eb',
+                                                        display: 'flex',
+                                                        justifyContent: 'space-between',
+                                                        alignItems: 'center',
+                                                        gap: '10px',
+                                                        flexWrap: 'wrap'
+                                                    }}>
+                                                        <div style={{ flex: 1 }}>
+                                                            <span style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--primary-color)', display: 'block' }}>
+                                                                Extension #{ext.extensionNumber}
+                                                            </span>
+                                                            <span style={{ fontSize: '0.78rem', color: '#6b7280' }}>
+                                                                {ext.fromDate} → {ext.toDate} &nbsp;|&nbsp;
+                                                                <strong>+{ext.extraDays} day(s)</strong> &nbsp;|&nbsp;
+                                                                <strong style={{ color: '#b45309' }}>₹{(ext.remainingPayment || 0).toLocaleString('en-IN')}</strong>
+                                                            </span>
+                                                        </div>
+                                                        {/* Cancel Extension Button */}
+                                                        <button
+                                                            onClick={() => handleCancelExtension(booking, index)}
+                                                            title="Cancel this extension"
+                                                            style={{
+                                                                background: '#fee2e2',
+                                                                border: 'none',
+                                                                borderRadius: '8px',
+                                                                padding: '5px 10px',
+                                                                cursor: 'pointer',
+                                                                color: '#b91c1c',
+                                                                fontSize: '0.75rem',
+                                                                fontWeight: '700',
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                gap: '4px',
+                                                                whiteSpace: 'nowrap'
+                                                            }}
+                                                        >
+                                                            <HiX /> Cancel
+                                                        </button>
+                                                    </div>
+                                                ))}
+
+                                                {/* Total Balance Summary */}
+                                                <div style={{
+                                                    display: 'flex',
+                                                    justifyContent: 'space-between',
+                                                    padding: '10px 14px',
+                                                    background: '#fef3c7',
+                                                    borderRadius: '10px',
+                                                    fontWeight: '800',
+                                                    fontSize: '0.9rem',
+                                                    color: '#92400e',
+                                                    marginTop: '4px'
+                                                }}>
+                                                    <span>Total Extended: +{totalExtraDays} day(s)</span>
+                                                    <span>Balance Due: ₹{(totalBalance || 0).toLocaleString('en-IN')}</span>
                                                 </div>
                                             </div>
                                         )}
@@ -276,16 +386,16 @@ const MyBookings = () => {
                                         )}
 
                                         <div className="booking-info-row">
-                                            <span className="info-label">Total Paid:</span>
-                                            <span className="info-value price">₹{booking.totalPrice.toLocaleString('en-IN')}</span>
+                                            <span className="info-label">Total {booking.status === 'Extended' ? 'Pre-Paid' : 'Paid'}:</span>
+                                            <span className="info-value price">₹{(booking.totalPrice || 0).toLocaleString('en-IN')}</span>
                                         </div>
                                         <div className="booking-info-row">
                                             <span className="info-label">Payment:</span>
                                             <span className="info-value">{booking.paymentMethod || 'Cash on Delivery'}</span>
                                         </div>
-                                        <div className="booking-info-row pickup-row">
+                                        <div className="booking-info-row">
                                             <span className="info-label">Pickup:</span>
-                                            <span className="info-value address">{booking.pickupAddress || '100 ft Road, Anand, 388001'}</span>
+                                            <span className="info-value" style={{ fontSize: '0.9rem' }}>{booking.pickupAddress || '100 ft Road, Anand, 388001'}</span>
                                         </div>
                                         <div className="booking-actions">
                                             <button

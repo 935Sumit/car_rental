@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef } from 'react'
+import { useState, useMemo, useRef, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
@@ -11,8 +11,8 @@ import './BookingModal.css'
 const BookingModal = ({ rental, onClose }) => {
   const { checkAvailability, addBooking, bookings } = useCarContext()
   const navigate = useNavigate()
-  const { currentUser: authUser } = useAuth()
-  const currentUser = authUser || JSON.parse(localStorage.getItem('currentUser')) || {}
+  const { currentUser: authUser, updateUser } = useAuth()
+  const currentUser = authUser || {}
   const [bookingId, setBookingId] = useState('')
   const receiptRef = useRef(null)
   const redirectTimerRef = useRef(null)
@@ -27,6 +27,15 @@ const BookingModal = ({ rental, onClose }) => {
   const [fieldErrors, setFieldErrors] = useState({})
   const [useSavedLicense, setUseSavedLicense] = useState(!!currentUser.licenseNumber)
   const [licenseInput, setLicenseInput] = useState('')
+  const [saveLicenseForFuture, setSaveLicenseForFuture] = useState(true)
+
+  // Keep useSavedLicense in sync when context user updates (e.g. after auto-save)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (currentUser.licenseNumber) {
+      setUseSavedLicense(true)
+    }
+  }, [currentUser.licenseNumber])
   const [showMockPayment, setShowMockPayment] = useState(false)
   const [isPaid, setIsPaid] = useState(false)
   const [paymentResponse, setPaymentResponse] = useState(null)
@@ -175,6 +184,31 @@ const BookingModal = ({ rental, onClose }) => {
         setFieldErrors({ general: `Booking failed: ${error.message}.` })
         return
       }
+
+      // Auto-save the license to profile if user typed a new one and opted in
+      if (!useSavedLicense && licenseInput.trim() && saveLicenseForFuture) {
+        const newLicense = licenseInput.trim()
+        try {
+          const { supabase } = await import('../supabase/supabaseClient')
+          // Try preferred key
+          const { error: err1 } = await supabase
+            .from('users')
+            .update({ licenseNumber: newLicense })
+            .eq('id', currentUser.id)
+            
+          // Try fallback key if first fails
+          if (err1) {
+            await supabase
+              .from('users')
+              .update({ license_number: newLicense })
+              .eq('id', currentUser.id)
+          }
+          updateUser({ licenseNumber: newLicense })
+        } catch (licErr) {
+          console.warn('License auto-save failed:', licErr)
+        }
+      }
+
       playSuccessSound()
       setSubmitted(true)
     } catch (e) {
@@ -571,6 +605,22 @@ const BookingModal = ({ rental, onClose }) => {
                           className={`license-input ${fieldErrors.license ? 'error' : ''}`}
                         />
                         <p className="input-hint">Format: GJ-XX-YYYY-ZZZZZZZ</p>
+                        {/* Save for future checkbox — only if user has no saved license */}
+                        {!currentUser.licenseNumber && licenseInput.trim().length > 5 && (
+                          <label style={{
+                            display: 'flex', alignItems: 'center', gap: '8px',
+                            marginTop: '10px', fontSize: '13px', fontWeight: '600',
+                            color: 'var(--primary-color)', cursor: 'pointer'
+                          }}>
+                            <input
+                              type="checkbox"
+                              checked={saveLicenseForFuture}
+                              onChange={e => setSaveLicenseForFuture(e.target.checked)}
+                              style={{ width: '15px', height: '15px', accentColor: 'var(--primary-color)', cursor: 'pointer' }}
+                            />
+                            Save this licence to my profile (won't ask again)
+                          </label>
+                        )}
                       </div>
                     )}
                     {fieldErrors.license && <p className="field-error-text" style={{ color: '#dc2626', fontSize: '12px', marginTop: '-8px', marginBottom: '16px', fontWeight: '600' }}>{fieldErrors.license}</p>}

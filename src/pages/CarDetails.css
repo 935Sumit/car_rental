@@ -337,6 +337,10 @@
 }
 
 @media (max-width: 900px) {
+    .car-details-page {
+        padding: 100px 0 60px;
+    }
+
     .details-grid {
         grid-template-columns: 1fr;
     }
@@ -347,10 +351,44 @@
     }
 
     .main-image-container {
-        height: 400px;
+        height: 300px;
     }
 
     .details-header h1 {
         font-size: 2.5rem;
+    }
+
+    .price-card {
+        width: 100%;
+        min-width: unset;
+        padding: 20px 24px;
+    }
+
+    .features-grid-left {
+        padding: 24px;
+    }
+
+    .terms-section {
+        padding: 24px;
+    }
+}
+
+@media (max-width: 480px) {
+    .details-header h1 {
+        font-size: 1.9rem;
+    }
+
+    .price-big {
+        font-size: 2.2rem;
+    }
+
+    .spec-item {
+        padding: 10px 14px;
+        font-size: 0.85rem;
+    }
+
+    .btn-book-now-large {
+        padding: 16px;
+        font-size: 1rem;
     }
 }
