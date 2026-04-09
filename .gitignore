@@ -40,9 +40,14 @@ backend/models/*.pkl
 # backend/data/*.csv
 
 # Environment Variables
+.env
 .env*
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
+
+# Vite / build artifacts
+.vite
+build
 
