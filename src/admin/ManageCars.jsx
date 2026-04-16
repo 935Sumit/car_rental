@@ -6,13 +6,14 @@ import './Dashboard.css'
 import './ManageCars.css'
 
 const ManageCars = () => {
-    const { rentals, addCar, deleteCar, updateCar } = useCarContext()
+    const { rentals, addCar, deleteCar, updateCar, checkAvailability } = useCarContext()
     const [loading, setLoading] = useState(false)
     const [showModal, setShowModal] = useState(false)
     const [isEditing, setIsEditing] = useState(false)
     const [currentCarId, setCurrentCarId] = useState(null)
     const [searchQuery, setSearchQuery] = useState('')
-    
+    const [filterDate, setFilterDate] = useState('')
+
     const [formData, setFormData] = useState({
         name: '',
         brand: '',
@@ -48,7 +49,7 @@ const ManageCars = () => {
                     cacheControl: '3600',
                     upsert: false
                 })
-            
+
             if (error) {
                 console.error("Supabase Storage Error:", error)
                 throw new Error(error.message || "Failed to upload image")
@@ -57,7 +58,7 @@ const ManageCars = () => {
             const { data: publicUrlData } = supabase.storage
                 .from('car-images')
                 .getPublicUrl(fileName)
-            
+
             return publicUrlData.publicUrl
         } catch (err) {
             console.error("Upload process failed:", err)
@@ -149,15 +150,22 @@ const ManageCars = () => {
     }
 
     const q = searchQuery.toLowerCase()
-    const filteredCars = rentals.filter(car =>
-        !q ||
-        car.name?.toLowerCase().includes(q) ||
-        car.brand?.toLowerCase().includes(q) ||
-        car.fuel?.toLowerCase().includes(q) ||
-        car.city?.toLowerCase().includes(q) ||
-        car.type?.toLowerCase().includes(q) ||
-        car.status?.toLowerCase().includes(q)
-    )
+    const filteredCars = rentals.filter(car => {
+        const matchesSearch = !q ||
+            car.name?.toLowerCase().includes(q) ||
+            car.brand?.toLowerCase().includes(q) ||
+            car.fuel?.toLowerCase().includes(q) ||
+            car.city?.toLowerCase().includes(q) ||
+            car.type?.toLowerCase().includes(q) ||
+            car.status?.toLowerCase().includes(q)
+        
+        let isAvailableOnDate = true
+        if (filterDate) {
+            isAvailableOnDate = checkAvailability(car.id, filterDate, filterDate)
+        }
+
+        return matchesSearch && isAvailableOnDate
+    })
 
     return (
         <div className="admin-dashboard">
@@ -176,20 +184,39 @@ const ManageCars = () => {
                     </header>
 
                     {/* ── Search Bar ── */}
-                    <div className="admin-search-bar">
-                        <HiSearch className="admin-search-icon" />
-                        <input
-                            type="text"
-                            placeholder="Search by car name, brand, fuel or city..."
-                            value={searchQuery}
-                            onChange={e => setSearchQuery(e.target.value)}
-                            className="admin-search-input"
-                        />
-                        {searchQuery && (
-                            <button className="admin-search-clear" onClick={() => setSearchQuery('')}>
-                                <HiX />
-                            </button>
-                        )}
+                    <div className="admin-controls-row">
+                        <div className="admin-search-bar">
+                            <HiSearch className="admin-search-icon" />
+                            <input
+                                type="text"
+                                placeholder="Search by car name, brand, fuel or city..."
+                                value={searchQuery}
+                                onChange={e => setSearchQuery(e.target.value)}
+                                className="admin-search-input"
+                            />
+                            {searchQuery && (
+                                <button className="admin-search-clear" onClick={() => setSearchQuery('')}>
+                                    <HiX />
+                                </button>
+                            )}
+                        </div>
+
+                        <div className="admin-date-filter">
+                            <input
+                                type="date"
+                                value={filterDate}
+                                onChange={e => setFilterDate(e.target.value)}
+                                className="admin-date-input"
+                                min={new Date().toISOString().split('T')[0]}
+                            />
+                            {filterDate && (
+                                <button className="admin-date-clear" onClick={() => setFilterDate('')}>
+                                    <HiX />
+                                </button>
+                            )}
+                            <span className="date-label">Check Availability</span>
+                        </div>
+
                         <span className="admin-search-count">
                             {filteredCars.length} / {rentals.length} cars
                         </span>
@@ -224,10 +251,9 @@ const ManageCars = () => {
                                             <td>{car.fuel}</td>
                                             <td>{car.seats}</td>
                                             <td>
-                                                <span className={`status-badge ${
-                                                    car.status === 'available' ? 'status-approved' : 
-                                                    car.status === 'maintenance' ? 'status-cancelled' : 'status-pending'
-                                                }`}>
+                                                <span className={`status-badge ${car.status === 'available' ? 'status-approved' :
+                                                        car.status === 'maintenance' ? 'status-cancelled' : 'status-pending'
+                                                    }`}>
                                                     {car.status ? car.status.charAt(0).toUpperCase() + car.status.slice(1) : (car.availability ? 'Available' : 'Booked')}
                                                 </span>
                                             </td>

@@ -21,6 +21,183 @@ const MyBookings = () => {
     const [searchQuery, setSearchQuery] = useState('')
     const [statusFilter, setStatusFilter] = useState('All')
 
+    const renderBookingCard = (booking, isHistory) => {
+        if (!booking) return null
+        const car = (rentals || []).find(r => r.id === booking.carId)
+        const displayImage = car?.image || booking.carImage || 'https://via.placeholder.com/300x200?text=Car'
+        const extensions = Array.isArray(booking.extensions) ? booking.extensions : []
+        const totalExtraDays = extensions.reduce((sum, e) => sum + (Number(e.extraDays) || 0), 0)
+        const totalBalance = extensions.reduce((sum, e) => sum + (Number(e.remainingPayment) || 0), 0)
+
+        return (
+            <motion.div
+                key={booking.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+                className={`booking-card-redesign ${isHistory ? 'history-card' : ''}`}
+                style={{ position: 'relative' }}
+            >
+                {booking.status === 'Extended' && (
+                    <div className="extended-badge">
+                        Extended {extensions.length > 1 ? `×${extensions.length}` : ''}
+                    </div>
+                )}
+
+                <div className="booking-image">
+                    <img
+                        src={displayImage}
+                        alt={booking.carName}
+                        onError={(e) => {
+                            e.target.src = 'https://via.placeholder.com/300x200?text=Car+Not+Found'
+                            e.target.onerror = null
+                        }}
+                    />
+                </div>
+
+                <div className="booking-details">
+                    <h3 className="car-name">{booking.carName}</h3>
+                    <div className="rc-specs" style={{ marginBottom: '15px' }}>
+                        {(car?.fuel || booking.fuel) && <span>{car?.fuel || booking.fuel}</span>}
+                        {(car?.fuel || booking.fuel) && (car?.transmission || booking.transmission) && <span className="separator">•</span>}
+                        {(car?.transmission || booking.transmission) && <span>{car?.transmission || booking.transmission}</span>}
+                        {(car?.transmission || booking.transmission) && (car?.seats || booking.seats) && <span className="separator">•</span>}
+                        {(car?.seats || booking.seats) && <span>{car?.seats || booking.seats} Seater</span>}
+                    </div>
+
+                    {/* Booking Dates */}
+                    <div className="booking-info-row">
+                        <span className="info-label">Original Dates:</span>
+                        <span className="info-value">
+                            {booking.startDate} → {booking.originalEndDate || (extensions.length > 0 ? extensions[0].fromDate : booking.endDate)}
+                        </span>
+                    </div>
+
+                    {booking.status === 'Extended' && (
+                        <div className="booking-info-row">
+                            <span className="info-label">Current End Date:</span>
+                            <span className="info-value" style={{ color: '#2563eb', fontWeight: '800' }}>
+                                {booking.endDate}
+                            </span>
+                        </div>
+                    )}
+
+                    {booking.driveType && (
+                        <div className="booking-info-row">
+                            <span className="info-label">Drive Type:</span>
+                            <span className="info-value highlight-blue" style={{ textTransform: 'capitalize' }}>
+                                {booking.driveType.replace('_', ' ')}
+                            </span>
+                        </div>
+                    )}
+
+                    {/* EXTENSIONS SECTION */}
+                    {extensions.length > 0 && (
+                        <div className="extension-details">
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                                <HiCalendar style={{ color: 'var(--secondary-color)' }} />
+                                <h4 style={{ margin: 0, fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--secondary-color)' }}>
+                                    Extension History ({extensions.length})
+                                </h4>
+                            </div>
+
+                            {extensions.map((ext, index) => (
+                                <div key={index} style={{
+                                    background: '#fff',
+                                    borderRadius: '10px',
+                                    padding: '10px 14px',
+                                    marginBottom: '8px',
+                                    border: '1px solid #e5e7eb',
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    gap: '10px',
+                                    flexWrap: 'wrap'
+                                }}>
+                                    <div style={{ flex: 1 }}>
+                                        <span style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--primary-color)', display: 'block' }}>
+                                            Extension #{ext.extensionNumber}
+                                        </span>
+                                        <span style={{ fontSize: '0.78rem', color: '#6b7280' }}>
+                                            {ext.fromDate} → {ext.toDate} &nbsp;|&nbsp;
+                                            <strong>+{ext.extraDays} day(s)</strong> &nbsp;|&nbsp;
+                                            <strong style={{ color: '#b45309' }}>₹{(ext.remainingPayment || 0).toLocaleString('en-IN')}</strong>
+                                        </span>
+                                    </div>
+                                    {!isHistory && (
+                                        <button
+                                            onClick={() => handleCancelExtension(booking, index)}
+                                            style={{
+                                                background: '#fee2e2',
+                                                border: 'none',
+                                                borderRadius: '8px',
+                                                padding: '5px 10px',
+                                                cursor: 'pointer',
+                                                color: '#b91c1c',
+                                                fontSize: '0.75rem',
+                                                fontWeight: '700',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '4px'
+                                            }}
+                                        >
+                                            <HiX /> Cancel
+                                        </button>
+                                    )}
+                                </div>
+                            ))}
+
+                            <div style={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                padding: '10px 14px',
+                                background: '#fef3c7',
+                                borderRadius: '10px',
+                                fontWeight: '800',
+                                fontSize: '0.9rem',
+                                color: '#92400e'
+                            }}>
+                                <span>Total Extended: +{totalExtraDays} day(s)</span>
+                                <span>Balance Due: ₹{(totalBalance || 0).toLocaleString('en-IN')}</span>
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="booking-info-row">
+                        <span className="info-label">Total {booking.status === 'Extended' ? 'Pre-Paid' : 'Paid'}:</span>
+                        <span className="info-value price">₹{(booking.totalPrice || 0).toLocaleString('en-IN')}</span>
+                    </div>
+
+                    <div className="booking-actions" style={{ marginTop: '20px' }}>
+                        {!isHistory && (
+                            <>
+                                <button
+                                    className="btn-action btn-extend"
+                                    onClick={() => setExtendingBooking(booking)}
+                                >
+                                    <HiCalendar /> Extend
+                                </button>
+                                <button
+                                    className="btn-action btn-cancel"
+                                    onClick={() => handleCancel(booking.id)}
+                                >
+                                    <HiX /> Cancel
+                                </button>
+                            </>
+                        )}
+                        <button
+                            className="btn-action btn-download-invoice"
+                            onClick={() => downloadInvoice(booking, currentUser)}
+                            style={{ flex: isHistory ? '1' : '0.5' }}
+                        >
+                            <HiDownload /> {isHistory ? 'Download History Invoice' : 'Invoice'}
+                        </button>
+                    </div>
+                </div>
+            </motion.div>
+        )
+    }
+
     const statusTabs = ['All', 'Active', 'Extended']
 
     const allUserBookings = useMemo(() => {
@@ -31,14 +208,30 @@ const MyBookings = () => {
         )
     }, [bookings, currentUser])
 
-    const userBookings = useMemo(() => {
-        return allUserBookings.filter(b => {
+    const { currentBookings, pastBookings } = useMemo(() => {
+        const today = new Date().setHours(0,0,0,0)
+        
+        const filtered = allUserBookings.filter(b => {
             const matchesStatus = statusFilter === 'All' || b.status === statusFilter
             const matchesSearch = !searchQuery ||
                 b.carName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 b.id?.toString().toLowerCase().includes(searchQuery.toLowerCase())
             return matchesStatus && matchesSearch
         }) || []
+
+        const current = []
+        const past = []
+
+        filtered.forEach(b => {
+            const endDate = new Date(b.endDate).setHours(0,0,0,0)
+            if (today > endDate) {
+                past.push(b)
+            } else {
+                current.push(b)
+            }
+        })
+
+        return { currentBookings: current, pastBookings: past }
     }, [allUserBookings, statusFilter, searchQuery])
 
     const handleCancel = (bookingId) => {
@@ -196,7 +389,7 @@ const MyBookings = () => {
                     </div>
 
                     <p style={{ marginTop: '16px', fontSize: '14px', color: '#6b7280', fontWeight: '500' }}>
-                        Showing <strong style={{ color: '#111827' }}>{userBookings.length}</strong> of <strong style={{ color: '#111827' }}>{allUserBookings.length}</strong> bookings
+                        Showing <strong style={{ color: '#111827' }}>{currentBookings.length + pastBookings.length}</strong> bookings
                     </p>
                 </header>
 
@@ -213,7 +406,7 @@ const MyBookings = () => {
                     )}
                 </AnimatePresence>
 
-                {userBookings.length === 0 ? (
+                {currentBookings.length === 0 && pastBookings.length === 0 ? (
                     <motion.div
                         className="empty-state"
                         initial={{ opacity: 0 }}
@@ -228,200 +421,35 @@ const MyBookings = () => {
                     </motion.div>
                 ) : (
                     <motion.div
-                        className="bookings-grid"
+                        className="bookings-container"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                     >
-                        {userBookings.map(booking => {
-                            if (!booking) return null
-                            const car = (rentals || []).find(r => r.id === booking.carId)
-                            const displayImage = car?.image || booking.carImage || 'https://via.placeholder.com/300x200?text=Car'
-                            const extensions = Array.isArray(booking.extensions) ? booking.extensions : []
-                            const totalExtraDays = extensions.reduce((sum, e) => sum + (Number(e.extraDays) || 0), 0)
-                            const totalBalance = extensions.reduce((sum, e) => sum + (Number(e.remainingPayment) || 0), 0)
+                        {/* ✅ ACTIVE BOOKINGS SECTION */}
+                        {currentBookings.length > 0 && (
+                            <section className="booking-section">
+                                <div className="section-divider">
+                                    <span>Active Bookings</span>
+                                    <div className="divider-line"></div>
+                                </div>
+                                <div className="bookings-grid">
+                                    {currentBookings.map(booking => renderBookingCard(booking, false))}
+                                </div>
+                            </section>
+                        )}
 
-                            return (
-                                <motion.div
-                                    key={booking.id}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ duration: 0.3 }}
-                                    className="booking-card-redesign"
-                                    style={{ position: 'relative' }}
-                                >
-                                    {booking.status === 'Extended' && (
-                                        <div className="extended-badge">
-                                            Extended {extensions.length > 1 ? `×${extensions.length}` : ''}
-                                        </div>
-                                    )}
-
-                                    <div className="booking-image">
-                                        <img
-                                            src={displayImage}
-                                            alt={booking.carName}
-                                            onError={(e) => {
-                                                e.target.src = 'https://via.placeholder.com/300x200?text=Car+Not+Found'
-                                                e.target.onerror = null
-                                            }}
-                                        />
-                                    </div>
-
-                                    <div className="booking-details">
-                                        <h3 className="car-name">{booking.carName}</h3>
-                                        <div className="rc-specs" style={{ marginBottom: '15px' }}>
-                                            {(car?.fuel || booking.fuel) && <span>{car?.fuel || booking.fuel}</span>}
-                                            {(car?.fuel || booking.fuel) && (car?.transmission || booking.transmission) && <span className="separator">•</span>}
-                                            {(car?.transmission || booking.transmission) && <span>{car?.transmission || booking.transmission}</span>}
-                                            {(car?.transmission || booking.transmission) && (car?.seats || booking.seats) && <span className="separator">•</span>}
-                                            {(car?.seats || booking.seats) && <span>{car?.seats || booking.seats} Seater</span>}
-                                        </div>
-
-                                        {/* Booking Dates */}
-                                        <div className="booking-info-row">
-                                            <span className="info-label">Original Dates:</span>
-                                            <span className="info-value">
-                                                {booking.startDate} → {booking.originalEndDate || (extensions.length > 0 ? extensions[0].fromDate : booking.endDate)}
-                                            </span>
-                                        </div>
-
-                                        {booking.status === 'Extended' && (
-                                            <div className="booking-info-row">
-                                                <span className="info-label">Current End Date:</span>
-                                                <span className="info-value" style={{ color: '#2563eb', fontWeight: '800' }}>
-                                                    {booking.endDate}
-                                                </span>
-                                            </div>
-                                        )}
-
-                                        {booking.driveType && (
-                                            <div className="booking-info-row">
-                                                <span className="info-label">Drive Type:</span>
-                                                <span className="info-value highlight-blue" style={{ textTransform: 'capitalize' }}>
-                                                    {booking.driveType.replace('_', ' ')}
-                                                </span>
-                                            </div>
-                                        )}
-
-                                        {/* ✅ EXTENSIONS SECTION - Shows each extension separately */}
-                                        {extensions.length > 0 && (
-                                            <div className="extension-details">
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-                                                    <HiCalendar style={{ color: 'var(--secondary-color)' }} />
-                                                    <h4 style={{ margin: 0, fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--secondary-color)' }}>
-                                                        Extension History ({extensions.length})
-                                                    </h4>
-                                                </div>
-
-                                                {/* Each Extension Row */}
-                                                {extensions.map((ext, index) => (
-                                                    <div key={index} style={{
-                                                        background: '#fff',
-                                                        borderRadius: '10px',
-                                                        padding: '10px 14px',
-                                                        marginBottom: '8px',
-                                                        border: '1px solid #e5e7eb',
-                                                        display: 'flex',
-                                                        justifyContent: 'space-between',
-                                                        alignItems: 'center',
-                                                        gap: '10px',
-                                                        flexWrap: 'wrap'
-                                                    }}>
-                                                        <div style={{ flex: 1 }}>
-                                                            <span style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--primary-color)', display: 'block' }}>
-                                                                Extension #{ext.extensionNumber}
-                                                            </span>
-                                                            <span style={{ fontSize: '0.78rem', color: '#6b7280' }}>
-                                                                {ext.fromDate} → {ext.toDate} &nbsp;|&nbsp;
-                                                                <strong>+{ext.extraDays} day(s)</strong> &nbsp;|&nbsp;
-                                                                <strong style={{ color: '#b45309' }}>₹{(ext.remainingPayment || 0).toLocaleString('en-IN')}</strong>
-                                                            </span>
-                                                        </div>
-                                                        {/* Cancel Extension Button */}
-                                                        <button
-                                                            onClick={() => handleCancelExtension(booking, index)}
-                                                            title="Cancel this extension"
-                                                            style={{
-                                                                background: '#fee2e2',
-                                                                border: 'none',
-                                                                borderRadius: '8px',
-                                                                padding: '5px 10px',
-                                                                cursor: 'pointer',
-                                                                color: '#b91c1c',
-                                                                fontSize: '0.75rem',
-                                                                fontWeight: '700',
-                                                                display: 'flex',
-                                                                alignItems: 'center',
-                                                                gap: '4px',
-                                                                whiteSpace: 'nowrap'
-                                                            }}
-                                                        >
-                                                            <HiX /> Cancel
-                                                        </button>
-                                                    </div>
-                                                ))}
-
-                                                {/* Total Balance Summary */}
-                                                <div style={{
-                                                    display: 'flex',
-                                                    justifyContent: 'space-between',
-                                                    padding: '10px 14px',
-                                                    background: '#fef3c7',
-                                                    borderRadius: '10px',
-                                                    fontWeight: '800',
-                                                    fontSize: '0.9rem',
-                                                    color: '#92400e',
-                                                    marginTop: '4px'
-                                                }}>
-                                                    <span>Total Extended: +{totalExtraDays} day(s)</span>
-                                                    <span>Balance Due: ₹{(totalBalance || 0).toLocaleString('en-IN')}</span>
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        {booking.discountPercent > 0 && (
-                                            <div className="booking-info-row">
-                                                <span className="info-label">Discount Applied:</span>
-                                                <span className="info-value" style={{ color: '#059669' }}>{booking.discountPercent}%</span>
-                                            </div>
-                                        )}
-
-                                        <div className="booking-info-row">
-                                            <span className="info-label">Total {booking.status === 'Extended' ? 'Pre-Paid' : 'Paid'}:</span>
-                                            <span className="info-value price">₹{(booking.totalPrice || 0).toLocaleString('en-IN')}</span>
-                                        </div>
-                                        <div className="booking-info-row">
-                                            <span className="info-label">Payment:</span>
-                                            <span className="info-value">{booking.paymentMethod || 'Cash on Delivery'}</span>
-                                        </div>
-                                        <div className="booking-info-row">
-                                            <span className="info-label">Pickup:</span>
-                                            <span className="info-value" style={{ fontSize: '0.9rem' }}>{booking.pickupAddress || '100 ft Road, Anand, 388001'}</span>
-                                        </div>
-                                        <div className="booking-actions">
-                                            <button
-                                                className="btn-action btn-extend"
-                                                onClick={() => setExtendingBooking(booking)}
-                                            >
-                                                <HiCalendar /> Extend
-                                            </button>
-                                            <button
-                                                className="btn-action btn-download-invoice"
-                                                onClick={() => downloadInvoice(booking, currentUser)}
-                                                title="Download Official Invoice"
-                                            >
-                                                <HiDownload /> Invoice
-                                            </button>
-                                            <button
-                                                className="btn-action btn-cancel"
-                                                onClick={() => handleCancel(booking.id)}
-                                            >
-                                                <HiX /> Cancel
-                                            </button>
-                                        </div>
-                                    </div>
-                                </motion.div>
-                            )
-                        })}
+                        {/* ✅ BOOKING HISTORY SECTION */}
+                        {pastBookings.length > 0 && (
+                            <section className="booking-section history-section" style={{ marginTop: '60px' }}>
+                                <div className="section-divider">
+                                    <span>Booking History</span>
+                                    <div className="divider-line"></div>
+                                </div>
+                                <div className="bookings-grid">
+                                    {pastBookings.map(booking => renderBookingCard(booking, true))}
+                                </div>
+                            </section>
+                        )}
                     </motion.div>
                 )}
             </div>

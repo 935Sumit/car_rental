@@ -24,6 +24,9 @@ export const CarProvider = ({ children }) => {
   const [searchQuery, setSearchQuery] = useState('')
   const [typeFilter, setTypeFilter] = useState('All')
   const [compareList, setCompareList] = useState([])
+  const [filterDate, setFilterDate] = useState('')
+  const [filterEndDate, setFilterEndDate] = useState('')
+  const [reviews, setReviews] = useState([])
 
   // Real-time rentals from Supabase
   useEffect(() => {
@@ -88,6 +91,31 @@ export const CarProvider = ({ children }) => {
       .subscribe()
     return () => {
       supabase.removeChannel(bookingsSubscription)
+    }
+  }, [])
+
+  // Real-time reviews from Supabase
+  useEffect(() => {
+    const fetchReviews = async () => {
+      const { data, error } = await supabase
+        .from('reviews')
+        .select('*')
+        .order('created_at', { ascending: false })
+      if (error) {
+        console.error("Supabase reviews error:", error)
+      } else {
+        setReviews(data || [])
+      }
+    }
+    fetchReviews()
+    const reviewsSubscription = supabase
+      .channel('reviews-changes')
+      .on('postgres_changes', { event: '*', table: 'reviews' }, () => {
+        fetchReviews()
+      })
+      .subscribe()
+    return () => {
+      supabase.removeChannel(reviewsSubscription)
     }
   }, [])
 
@@ -230,6 +258,58 @@ export const CarProvider = ({ children }) => {
     } catch (e) {
       console.error("Error deleting booking:", e)
       throw e
+    }
+  }
+
+  const addReview = async (reviewData) => {
+    try {
+      console.log("Attempting to add review:", reviewData)
+      const { data, error } = await supabase
+        .from('reviews')
+        .insert([reviewData])
+        .select()
+        
+      if (error) {
+        console.error("Supabase error detail:", error)
+        return { error }
+      }
+      
+      setReviews(prev => [data[0], ...prev])
+      return { data: data[0] }
+    } catch (e) {
+      console.error("Critical error in addReview:", e)
+      return { error: e }
+    }
+  }
+
+  const deleteReview = async (reviewId) => {
+    try {
+      const { error } = await supabase
+        .from('reviews')
+        .delete()
+        .eq('id', reviewId)
+      if (error) throw error
+      setReviews(prev => prev.filter(r => r.id !== reviewId))
+      return { success: true }
+    } catch (e) {
+      console.error("Error deleting review:", e)
+      return { error: e }
+    }
+  }
+
+  const updateReview = async (reviewId, updatedData) => {
+    try {
+      const { data, error } = await supabase
+        .from('reviews')
+        .update(updatedData)
+        .eq('id', reviewId)
+        .select()
+      if (error) throw error
+      setReviews(prev => prev.map(r => r.id === reviewId ? data[0] : r))
+      return { data: data[0] }
+    } catch (e) {
+      console.error("Error updating review:", e)
+      return { error: e }
     }
   }
 
@@ -392,7 +472,15 @@ export const CarProvider = ({ children }) => {
       (rental.city && rental.city.toLowerCase().includes(searchQuery.toLowerCase())) ||
       (rental.type && rental.type.toLowerCase().includes(searchQuery.toLowerCase()))
     const matchesType = typeFilter === 'All' || rental.type === typeFilter
-    return matchesSearch && matchesType
+    
+    let isAvailableOnDate = true
+    if (filterDate) {
+      // If end date is provided, check the range. If not, check the single day.
+      const endDate = filterEndDate || filterDate
+      isAvailableOnDate = checkAvailability(rental.id, filterDate, endDate)
+    }
+
+    return matchesSearch && matchesType && isAvailableOnDate
   })
 
   const toggleCompare = (car) => {
@@ -430,12 +518,20 @@ export const CarProvider = ({ children }) => {
     setSearchQuery,
     typeFilter,
     setTypeFilter,
+    filterDate,
+    setFilterDate,
+    filterEndDate,
+    setFilterEndDate,
     filteredRentals: filteredRentalsList,
     checkAvailability,
     toggleSaveCar,
     isCarSaved,
     loading,
-    error
+    error,
+    reviews,
+    addReview,
+    deleteReview,
+    updateReview
   }
 
   return <CarContext.Provider value={value}>{children}</CarContext.Provider>

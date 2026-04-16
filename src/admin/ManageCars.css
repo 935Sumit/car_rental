@@ -176,6 +176,82 @@
   box-shadow: 0 2px 16px rgba(92, 61, 30, 0.12);
 }
 
+.admin-controls-row {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.admin-controls-row .admin-search-bar {
+  margin-bottom: 0;
+  flex: 2;
+}
+
+.admin-date-filter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: white;
+  border: 2px solid #e5e7eb;
+  padding: 10px 16px;
+  border-radius: 14px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  flex: 1;
+  position: relative;
+}
+
+.admin-date-input {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-family: inherit;
+  font-weight: 600;
+  color: var(--primary-color);
+  font-size: 14px;
+}
+
+.admin-date-clear {
+  background: #f3f4f6;
+  border: none;
+  cursor: pointer;
+  color: #6b7280;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  transition: all 0.2s;
+}
+
+.admin-date-clear:hover {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.date-label {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-left: auto;
+}
+
+@media (max-width: 992px) {
+  .admin-controls-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .admin-controls-row > div {
+    flex: none;
+  }
+}
+
 .admin-search-icon {
   color: var(--primary-color);
   font-size: 20px;

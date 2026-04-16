@@ -24,6 +24,10 @@ const Home = () => {
     isCarSaved, 
     compareList, 
     toggleCompare,
+    filterDate,
+    setFilterDate,
+    filterEndDate,
+    setFilterEndDate,
     loading,
     error: contextError
   } = useCarContext()
@@ -85,7 +89,45 @@ const Home = () => {
           </motion.p>
 
           <div className="hero-search-container">
-            <SearchBar value={searchQuery} onChange={setSearchQuery} placeholder="Search by name, brand, city, or type..." />
+            <div className="unified-search-bar">
+              <div className="search-input-group">
+                <input
+                  type="text"
+                  placeholder="Search brand, model or city..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+              <div className="date-input-group">
+                <div className="date-field">
+                  <label>Pickup</label>
+                  <input 
+                    type="date" 
+                    value={filterDate} 
+                    onChange={(e) => setFilterDate(e.target.value)}
+                    min={new Date().toISOString().split('T')[0]}
+                  />
+                </div>
+                <div className="date-separator">→</div>
+                <div className="date-field">
+                  <label>Return</label>
+                  <input 
+                    type="date" 
+                    value={filterEndDate} 
+                    onChange={(e) => setFilterEndDate(e.target.value)}
+                    min={filterDate || new Date().toISOString().split('T')[0]}
+                  />
+                </div>
+              </div>
+              <div className="search-actions">
+                <button className="btn-hero-search">Search Car</button>
+              </div>
+            </div>
+            {(filterDate || filterEndDate || searchQuery) && (
+              <button className="clear-all-home" onClick={() => { setFilterDate(''); setFilterEndDate(''); setSearchQuery(''); }}>
+                Reset Filters
+              </button>
+            )}
           </div>
 
           {error && (
